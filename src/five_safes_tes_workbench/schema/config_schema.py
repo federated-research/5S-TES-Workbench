@@ -54,15 +54,5 @@ class WorkbenchConfigValidationModel(BaseModel):
                 )
         return cleaned
     
-    
-    @field_validator(ConfigKey.TES_BASE_URL.value, ConfigKey.MINIO_STS_ENDPOINT.value)
-    @classmethod
-    def url_must_be_valid(cls, v: str, info: ValidationInfo) -> str:
-        if not v.startswith(("http://", "https://")):
-            raise ValueError(
-                f"{info.field_name} must start with http:// or https://, got '{v}'"
-            )
-        return v
-    
 
 
