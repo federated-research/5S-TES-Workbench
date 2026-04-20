@@ -1,6 +1,8 @@
-from pydantic import BaseModel, field_validator, ValidationInfo
+from typing import Annotated
+from pydantic import BaseModel, field_validator, ValidationInfo, AnyHttpUrl, AfterValidator
 from ..enums.config_enums import ConfigKey
 
+HttpUrlString = Annotated[AnyHttpUrl, AfterValidator(lambda v: str(v))]
 
 class WorkbenchConfigValidationModel(BaseModel):
     """
@@ -18,8 +20,8 @@ class WorkbenchConfigValidationModel(BaseModel):
     """
 
     project: str
-    tes_base_url: str
-    minio_sts_endpoint: str
+    tes_base_url: HttpUrlString
+    minio_sts_endpoint: HttpUrlString
     minio_endpoint: str
     minio_output_bucket: str
     tres: list[str] 
