@@ -56,6 +56,8 @@ class WorkbenchConfigValidationModel(BaseModel):
                 )
         return cleaned
     
+    # Return Configs as Immutable Dataclass
+    
     def to_validated_config(self) -> ConfigValidationDataClass:
         """
         Convert the validated Pydantic model to a 
