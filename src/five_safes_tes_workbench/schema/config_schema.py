@@ -1,12 +1,12 @@
 from typing import Annotated
 from pydantic import BaseModel, field_validator, ValidationInfo, AnyHttpUrl, BeforeValidator
-from ..enums.config_enums import ConfigKey
-from ..models.config_dataclass import ConfigValidationDataClass
+from ..common.validator_enums import ConfigKey
+from ..common.validator_dataclass import ConfigValidationDataClass
 
 
 HttpUrlString = Annotated[str, BeforeValidator(lambda v: str(AnyHttpUrl(v)))]
 
-class WorkbenchConfigValidationModel(BaseModel):
+class ConfigValidationModel(BaseModel):
     """
     Pydantic Model for validating the configuration of
     the Five Safes TES Workbench setup.
