@@ -1,7 +1,4 @@
-import copy
 import os
-import json
-
 import requests
 from five_safes_tes_workbench.auth.auth import keycloak_token
 from five_safes_tes_workbench.helpers.build_tags import default_tags
