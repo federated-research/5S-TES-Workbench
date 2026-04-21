@@ -9,8 +9,15 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.13.1",
+    "pyyaml>=6.0.3",
 ]
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.20.1",
+    "types-pyyaml>=6.0.12.20260408",
+]
