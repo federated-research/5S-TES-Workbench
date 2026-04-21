@@ -31,10 +31,9 @@ class TESTaskV2:
             creation_time=None,
         )
         bearer = keycloak_token()
-        # Create client
-        cli = tes.HTTPClient(tasks_url, timeout=60, token=bearer)
+        # Inspect the task payload before submitting
+        print("task_dict for inspection", task.as_json(indent=3))
 
-        print("task_dict", task.as_json(indent=3))
         # Create task manually to avoid UnmarshalError caused by the server
         # returning a '$id' field that py-tes cannot unpack as a keyword argument.
         create_response = requests.post(
