@@ -7,6 +7,29 @@ from ..common.validator_dataclass import AuthValidationDataClass, AuthMode
 HttpUrlString = Annotated[str, BeforeValidator(lambda v: str(AnyHttpUrl(v)))]
 
 class AuthValidationModel(BaseModel):
+    """
+    Pydantic Model for validating the authentication
+    configuration of the Five Safes TES Workbench setup.
+    
+    Attributes:
+    - auth_mode: The authentication mode (ACCESS_TOKEN or CREDENTIALS).
+    
+    For ACCESS_TOKEN mode:
+        - access_token: The access token for authentication.
+        
+    For CREDENTIALS mode:
+        - submission_keycloak_client_id: The Keycloak client
+          ID for submission.
+        - submission_keycloak_client_secret: The Keycloak client
+          secret for submission.
+        - submission_keycloak_url: The Keycloak URL 
+          for submission.
+        - submission_keycloak_username: The Keycloak username 
+          for submission.
+        - submission_keycloak_password: The Keycloak password 
+          for submission.
+    """
+    auth_mode: AuthMode | None = None
 
     access_token: str | None = None
 
@@ -63,6 +86,11 @@ class AuthValidationModel(BaseModel):
         
 
     def to_validated_config(self) -> AuthValidationDataClass:
+        """
+        Validates the configuration based on the auth mode
+        and returns an immutable dataclass representation of the
+        authentication configuration.
+        """
         auth_mode = self._check_auth_mode()
 
         if auth_mode == AuthMode.ACCESS_TOKEN:
