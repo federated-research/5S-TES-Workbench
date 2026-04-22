@@ -1,8 +1,6 @@
 from typing import Annotated
-from pydantic import AnyHttpUrl, BeforeValidator
-
-from pydantic import BaseModel, model_validator
-from ..common.validator_dataclass import AuthValidationDataModel, AuthMode
+from pydantic import AnyHttpUrl, BeforeValidator, BaseModel, model_validator
+from ..common.validator_enums import AuthMode
 
 HttpUrlString = Annotated[str, BeforeValidator(lambda v: str(AnyHttpUrl(v)))]
 
@@ -29,7 +27,9 @@ class AuthValidationModel(BaseModel):
         - password: The Keycloak password 
           for submission.
     """
-    auth_mode: AuthMode | None = None
+    model_config = {"frozen": True}
+
+    auth_mode: AuthMode = AuthMode.CREDENTIALS
 
     access_token: str | None = None
 
@@ -39,30 +39,35 @@ class AuthValidationModel(BaseModel):
     username: str | None = None
     password: str | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_auth(cls, values: dict[str, object]) -> dict[str, object]:
+        token: object = values.get("access_token")
+        if isinstance(token, str):
+            values["access_token"] = token.strip()
+
+        if values.get("access_token"):
+            values["auth_mode"] = AuthMode.ACCESS_TOKEN
+        else:
+            values["auth_mode"] = AuthMode.CREDENTIALS
+
+        return values
+    
+
     @model_validator(mode="after")
     def validate_auth(self) -> "AuthValidationModel":
-        auth_mode = self._check_auth_mode()
-
-        if auth_mode == AuthMode.ACCESS_TOKEN:
+        if self.auth_mode == AuthMode.ACCESS_TOKEN:
             self._validate_access_token()
         else:
             self._validate_credentials()
 
         return self
-    
-
-    def _check_auth_mode(self) -> AuthMode:
-        if self.access_token is not None:
-            return AuthMode.ACCESS_TOKEN
-        return AuthMode.CREDENTIALS
-    
 
     def _validate_access_token(self) -> None:
-        if self.access_token is None or self.access_token.strip() == "":
+        if not self.access_token:
             raise ValueError(
                 "Access token must not be empty for ACCESS_TOKEN auth mode."
             )
-        self.access_token = self.access_token.strip()
         
 
     def _validate_credentials(self) -> None:
@@ -83,27 +88,3 @@ class AuthValidationModel(BaseModel):
                 f"Missing required fields for CREDENTIALS auth mode: "
                 f"{', '.join(missing)}"
             )
-        
-
-    def to_validated_config(self) -> AuthValidationDataModel:
-        """
-        Validates the configuration based on the auth mode
-        and returns an immutable dataclass representation of the
-        authentication configuration.
-        """
-        auth_mode = self._check_auth_mode()
-
-        if auth_mode == AuthMode.ACCESS_TOKEN:
-            return AuthValidationDataModel(
-                auth_mode=auth_mode,
-                access_token=self.access_token,
-            )
-
-        return AuthValidationDataModel(
-            auth_mode=auth_mode,
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            keycloak_url=self.keycloak_url,
-            username=self.username,
-            password=self.password,
-        )
