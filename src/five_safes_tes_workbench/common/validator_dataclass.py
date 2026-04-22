@@ -1,9 +1,8 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 from .validator_enums import AuthMode
 
 
-@dataclass(frozen=True)
-class ConfigValidationDataClass:
+class ConfigValidationDataModel(BaseModel):
     """
     Data class representing the configuration for 
     validating the Five Safes TES Workbench setup. 
@@ -17,6 +16,7 @@ class ConfigValidationDataClass:
         minio_output_bucket (str): The name of the MinIO bucket for output.
         tres (Tuple[str, ...]): A tuple of TES endpoints to validate against.
     """
+    model_config = {'frozen': True}
 
     project: str
     tes_base_url: str
@@ -26,8 +26,7 @@ class ConfigValidationDataClass:
     tres: tuple[str, ...]
 
 
-@dataclass(frozen=True)
-class AuthValidationDataClass:
+class AuthValidationDataModel(BaseModel):
     """
     Data class representing the authentication configuration for
     validating the Five Safes TES Workbench setup.
@@ -39,12 +38,13 @@ class AuthValidationDataClass:
         - access_token (str): The access token for authentication.
 
     For CREDENTIALS mode:
-        - submission_keycloak_client_id (str): The Keycloak client ID for submission.
-        - submission_keycloak_client_secret (str): The Keycloak client secret for submission.
-        - submission_keycloak_url (str): The Keycloak URL for submission.
-        - submission_keycloak_username (str): The Keycloak username for submission.
-        - submission_keycloak_password (str): The Keycloak password for submission.
+        - client_id (str): The Keycloak client ID for submission.
+        - client_secret (str): The Keycloak client secret for submission.
+        - keycloak_url (str): The Keycloak URL for submission.
+        - username (str): The Keycloak username for submission.
+        - password (str): The Keycloak password for submission.
     """
+    model_config = {'frozen': True}
 
     auth_mode: AuthMode
 
@@ -52,8 +52,8 @@ class AuthValidationDataClass:
     access_token: str | None = None
 
     # Credentials
-    submission_keycloak_client_id: str | None = None
-    submission_keycloak_client_secret: str | None = None
-    submission_keycloak_url: str | None = None
-    submission_keycloak_username: str | None = None
-    submission_keycloak_password: str | None = None
+    client_id: str | None = None
+    client_secret: str | None = None
+    keycloak_url: str | None = None
+    username: str | None = None
+    password: str | None = None
