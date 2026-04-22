@@ -1,7 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel, field_validator, ValidationInfo, AnyHttpUrl, BeforeValidator
 from ..common.validator_enums import ConfigKey
-from ..common.validator_dataclass import ConfigValidationDataModel
 
 
 HttpUrlString = Annotated[str, BeforeValidator(lambda v: str(AnyHttpUrl(v)))]
@@ -20,6 +19,7 @@ class ConfigValidationModel(BaseModel):
     - minio_output_bucket: The name of the MinIO bucket for output.
     - tres: A list of TREs.
     """
+    model_config = {"frozen": True}
 
     project: str
     tes_base_url: HttpUrlString
@@ -56,25 +56,5 @@ class ConfigValidationModel(BaseModel):
                 )
         return cleaned
     
-    # Return Configs as Immutable Dataclass
-    
-    def to_validated_config(self) -> ConfigValidationDataModel:
-        """
-        Convert the validated Pydantic model to a 
-        frozen dataclass.
-
-        Returns:
-        ---------
-            ConfigValidationDataModel: An immutable 
-            configuration dataclass.
-        """
-        return ConfigValidationDataModel(
-            project=self.project,
-            tes_base_url=self.tes_base_url,
-            minio_sts_endpoint=self.minio_sts_endpoint,
-            minio_endpoint=self.minio_endpoint,
-            minio_output_bucket=self.minio_output_bucket,
-            tres=tuple(self.tres),
-        )
 
 
