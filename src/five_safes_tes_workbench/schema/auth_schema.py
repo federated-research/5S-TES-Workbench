@@ -2,7 +2,7 @@ from typing import Annotated
 from pydantic import AnyHttpUrl, BeforeValidator
 
 from pydantic import BaseModel, model_validator
-from ..common.validator_dataclass import AuthValidationDataClass, AuthMode
+from ..common.validator_dataclass import AuthValidationDataModel, AuthMode
 
 HttpUrlString = Annotated[str, BeforeValidator(lambda v: str(AnyHttpUrl(v)))]
 
@@ -18,26 +18,26 @@ class AuthValidationModel(BaseModel):
         - access_token: The access token for authentication.
         
     For CREDENTIALS mode:
-        - submission_keycloak_client_id: The Keycloak client
+        - client_id: The Keycloak client
           ID for submission.
-        - submission_keycloak_client_secret: The Keycloak client
+        - client_secret: The Keycloak client
           secret for submission.
-        - submission_keycloak_url: The Keycloak URL 
+        - keycloak_url: The Keycloak URL 
           for submission.
-        - submission_keycloak_username: The Keycloak username 
+        - username: The Keycloak username 
           for submission.
-        - submission_keycloak_password: The Keycloak password 
+        - password: The Keycloak password 
           for submission.
     """
     auth_mode: AuthMode | None = None
 
     access_token: str | None = None
 
-    submission_keycloak_client_id: str | None = None
-    submission_keycloak_client_secret: str | None = None
-    submission_keycloak_url: HttpUrlString | None = None
-    submission_keycloak_username: str | None = None
-    submission_keycloak_password: str | None = None
+    client_id: str | None = None
+    client_secret: str | None = None
+    keycloak_url: HttpUrlString | None = None
+    username: str | None = None
+    password: str | None = None
 
     @model_validator(mode="after")
     def validate_auth(self) -> "AuthValidationModel":
@@ -67,11 +67,11 @@ class AuthValidationModel(BaseModel):
 
     def _validate_credentials(self) -> None:
         credential_fields = [
-            "submission_keycloak_client_id",
-            "submission_keycloak_client_secret",
-            "submission_keycloak_url",
-            "submission_keycloak_username",
-            "submission_keycloak_password",
+            "client_id",
+            "client_secret",
+            "keycloak_url",
+            "username",
+            "password",
         ]
         missing = [
             field for field in credential_fields
@@ -85,7 +85,7 @@ class AuthValidationModel(BaseModel):
             )
         
 
-    def to_validated_config(self) -> AuthValidationDataClass:
+    def to_validated_config(self) -> AuthValidationDataModel:
         """
         Validates the configuration based on the auth mode
         and returns an immutable dataclass representation of the
@@ -94,16 +94,16 @@ class AuthValidationModel(BaseModel):
         auth_mode = self._check_auth_mode()
 
         if auth_mode == AuthMode.ACCESS_TOKEN:
-            return AuthValidationDataClass(
+            return AuthValidationDataModel(
                 auth_mode=auth_mode,
                 access_token=self.access_token,
             )
 
-        return AuthValidationDataClass(
+        return AuthValidationDataModel(
             auth_mode=auth_mode,
-            submission_keycloak_client_id=self.submission_keycloak_client_id,
-            submission_keycloak_client_secret=self.submission_keycloak_client_secret,
-            submission_keycloak_url=self.submission_keycloak_url,
-            submission_keycloak_username=self.submission_keycloak_username,
-            submission_keycloak_password=self.submission_keycloak_password,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            keycloak_url=self.keycloak_url,
+            username=self.username,
+            password=self.password,
         )
