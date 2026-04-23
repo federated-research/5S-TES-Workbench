@@ -1,6 +1,6 @@
 [project]
 name = "five-safes-tes-workbench"
-version = "0.1.0"
+version = "0.1.1"
 description = "Common feature library for working with 5S-TES"
 readme = "README.md"
 authors = [
