@@ -37,7 +37,7 @@ class WorkbenchValidateBuilder:
         Returns the validated infrastructure configuration.
         """
         if self._config is None:
-            raise ValueError("Must call .validate() first")
+            raise ValueError("Before building the TES message, please call the function validate().")
         return self._config
 
     @property
