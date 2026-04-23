@@ -1,5 +1,3 @@
-# common/tes_params.py
-
 from typing import TypedDict, Required, NotRequired
 
 
@@ -20,7 +18,7 @@ class TESTaskParams(TypedDict):
 
     image: Required[str]
     command: Required[list[str]]
-    name: NotRequired[str]
+    name: Required[str]
     description: NotRequired[str]
     output_url: NotRequired[str]
     output_path: NotRequired[str]
