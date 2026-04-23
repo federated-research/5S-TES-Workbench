@@ -195,7 +195,7 @@ class WorkbenchMinioBuilder:
         logger.info("Child task ID: %s", child_task_id)
         return child_task_id
 
-    def fetch_all_results(
+    def fetch_result(
         self, task_id: str, bucket: str | None = None
     ) -> dict[str, str | dict[str, Any] | list[Any] | None]:
         """

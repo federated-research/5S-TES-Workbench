@@ -90,7 +90,7 @@ class Workbench:
 
     # ----- MinIO Results Builder -----
 
-    def fetch_results(
+    def fetch_result_by_tre(
         self,
         task_id: str | None = None,
         tre: str | None = None,
@@ -138,4 +138,50 @@ class Workbench:
         )
         child_task_id = self._minio_builder.get_child_task_id(resolved_id, tre)
 
-        return self._minio_builder.fetch_all_results(child_task_id, bucket=bucket)
+        return self._minio_builder.fetch_result(child_task_id, bucket=bucket)
+
+    def fetch_all_results(
+        self,
+        task_id: str | None = None,
+        bucket: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Fetch all output objects written by a completed TES task from MinIO.
+
+        Authentication is re-used from the earlier :meth:`validate` call.
+        Credentials are exchanged at the configured STS endpoint so that a
+        temporary MinIO session is obtained automatically.
+
+        Parameters
+        ----------
+        - task_id: ID of the task whose results to retrieve. Defaults to
+          the ID returned by the most recent :meth:`submit` call.
+        - tre: Name of the TRE to fetch the results for.
+        - bucket: Override the output bucket from config. Defaults to
+          ``config.minio_output_bucket``.
+
+        Returns
+        -------
+        A dict mapping each result object path to its parsed content
+        (JSON / CSV decoded where possible, raw string otherwise).
+        """
+        resolved_id = task_id or self._last_task_id
+        if resolved_id is None:
+            raise ValueError(
+                "No Submission task ID available. Either call submit() first or pass "
+                "a task_id explicitly to fetch_results()."
+            )
+
+        results: dict[str, dict[str, Any]] = {}
+
+        self._minio_builder.initialise(
+            config=self._validator.config,
+            auth=self._validator.auth,
+        )
+        for tre in self._validator.config.tres:
+            child_task_id = self._minio_builder.get_child_task_id(resolved_id, tre)
+            results[tre] = self._minio_builder.fetch_result(
+                child_task_id, bucket=bucket
+            )
+
+        return results
