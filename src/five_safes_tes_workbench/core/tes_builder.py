@@ -35,7 +35,7 @@ class WorkbenchTESBuilder:
         Returns the built TES task.
         """
         if self._tes_task is None:
-            raise ValueError("Must call .build() first")
+            raise ValueError("Before submitting the TES message, please call the function build_tes().")
         return self._tes_task
 
     def build(
