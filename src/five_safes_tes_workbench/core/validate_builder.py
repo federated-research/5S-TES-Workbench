@@ -46,7 +46,7 @@ class WorkbenchValidateBuilder:
         Returns the validated authentication configuration.
         """
         if self._auth is None:
-            raise ValueError("Must call .validate() first")
+            raise ValueError("Before submitting the TES message, please call the function validate().")
         return self._auth
 
     def validate(
