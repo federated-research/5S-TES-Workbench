@@ -69,7 +69,11 @@ class WorkbenchMinioBuilder:
         )
         self._config = config
 
-        logger.info("MinIO client initialised (endpoint=%s, secure=%s)", config.minio_endpoint, secure)
+        logger.info(
+            "MinIO client initialised (endpoint=%s, secure=%s)",
+            config.minio_endpoint,
+            secure,
+        )
 
     # ------------------------------------------------------------------
     # Public result-fetching methods
@@ -97,7 +101,9 @@ class WorkbenchMinioBuilder:
         prefix = f"{task_id}/"
 
         try:
-            objects = client.list_objects(resolved_bucket, prefix=prefix, recursive=True)
+            objects = client.list_objects(
+                resolved_bucket, prefix=prefix, recursive=True
+            )
             names = [obj.object_name for obj in objects]
             logger.info("Found %d result object(s) for task %s", len(names), task_id)
             return names
@@ -135,7 +141,7 @@ class WorkbenchMinioBuilder:
                 return None
             raise
 
-    def get_result_parsed(
+    def _parse_result(
         self, object_path: str, bucket: str | None = None
     ) -> str | dict[str, Any] | list[Any] | None:
         """
@@ -168,6 +174,27 @@ class WorkbenchMinioBuilder:
 
         return content
 
+    def get_child_task_id(self, parent_task_id: str, tre: str) -> str:
+        """
+        Get the child task ID for a given task and TRE.
+        """
+        response = requests.get(
+            f"{self._config.tes_base_url.rstrip('/')}/api/Submission/GetChildSubmissionIdByParentAndTre?parentSubmissionId={parent_task_id}&treName={tre}"
+        )
+        response.raise_for_status()
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get child task ID: {response.status_code} {response.text}"
+            )
+
+        child_task_id = response.json()
+        if child_task_id is None:
+            raise RuntimeError(
+                f"No child task ID found for parent task {parent_task_id} and TRE {tre}"
+            )
+        logger.info("Child task ID: %s", child_task_id)
+        return child_task_id
+
     def fetch_all_results(
         self, task_id: str, bucket: str | None = None
     ) -> dict[str, str | dict[str, Any] | list[Any] | None]:
@@ -192,7 +219,7 @@ class WorkbenchMinioBuilder:
         results: dict[str, str | dict[str, Any] | list[Any] | None] = {}
         for path in object_paths:
             logger.info("Fetching result object: %s", path)
-            results[path] = self.get_result_parsed(path, bucket=bucket)
+            results[path] = self._parse_result(path, bucket=bucket)
 
         return results
 
@@ -222,7 +249,9 @@ class WorkbenchMinioBuilder:
         Call the STS AssumeRoleWithWebIdentity action and return temporary
         AWS-style credentials.
         """
-        logger.info("Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint)
+        logger.info(
+            "Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint
+        )
 
         response = requests.post(
             sts_endpoint,
@@ -248,15 +277,23 @@ class WorkbenchMinioBuilder:
             raise RuntimeError("STS response contained no Credentials element")
 
         return {
-            "access_key": credentials.findtext("sts:AccessKeyId", namespaces=_STS_NS) or "",
-            "secret_key": credentials.findtext("sts:SecretAccessKey", namespaces=_STS_NS) or "",
-            "session_token": credentials.findtext("sts:SessionToken", namespaces=_STS_NS) or "",
+            "access_key": credentials.findtext("sts:AccessKeyId", namespaces=_STS_NS)
+            or "",
+            "secret_key": credentials.findtext(
+                "sts:SecretAccessKey", namespaces=_STS_NS
+            )
+            or "",
+            "session_token": credentials.findtext(
+                "sts:SessionToken", namespaces=_STS_NS
+            )
+            or "",
         }
 
 
 # ------------------------------------------------------------------
 # Module-level helper
 # ------------------------------------------------------------------
+
 
 def _is_https(url: str) -> bool:
     parsed = urlparse(url)

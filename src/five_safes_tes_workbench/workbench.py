@@ -93,6 +93,7 @@ class Workbench:
     def fetch_results(
         self,
         task_id: str | None = None,
+        tre: str | None = None,
         bucket: str | None = None,
     ) -> dict[str, Any]:
         """
@@ -106,6 +107,7 @@ class Workbench:
         ----------
         - task_id: ID of the task whose results to retrieve. Defaults to
           the ID returned by the most recent :meth:`submit` call.
+        - tre: Name of the TRE to fetch the results for.
         - bucket: Override the output bucket from config. Defaults to
           ``config.minio_output_bucket``.
 
@@ -117,12 +119,23 @@ class Workbench:
         resolved_id = task_id or self._last_task_id
         if resolved_id is None:
             raise ValueError(
-                "No task ID available. Either call submit() first or pass "
+                "No Submission task ID available. Either call submit() first or pass "
                 "a task_id explicitly to fetch_results()."
+            )
+
+        if tre is None:
+            raise ValueError(
+                "No TRE available. Please specify the TRE to fetch the results for."
+            )
+        if tre not in self._validator.config.tres:
+            raise ValueError(
+                f"TRE {tre} not found in the configuration. Please specify a valid TRE."
             )
 
         self._minio_builder.initialise(
             config=self._validator.config,
             auth=self._validator.auth,
         )
-        return self._minio_builder.fetch_all_results(resolved_id, bucket=bucket)
+        child_task_id = self._minio_builder.get_child_task_id(resolved_id, tre)
+
+        return self._minio_builder.fetch_all_results(child_task_id, bucket=bucket)
