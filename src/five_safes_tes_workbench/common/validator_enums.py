@@ -17,5 +17,8 @@ class ConfigKey(str, Enum):
 
 
 class AuthMode(str, Enum):
+    """
+    Defines authentication modes for the Workbench.
+    """
     ACCESS_TOKEN = "token"  # nosec B105
     CREDENTIALS = "credentials"
