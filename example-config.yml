@@ -11,7 +11,7 @@ config:
   minio_endpoint: "your-minio-endpoint:9000"
   minio_output_bucket: "your-output-bucket-name"
   tres:
-    - "TRE1"
+    - "Your-TRE1"
     - "Add more TREs as needed"
 
 
