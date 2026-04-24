@@ -3,7 +3,7 @@ from typing import Any, Unpack
 from .core.validate_builder import WorkbenchValidateBuilder
 from .core.tes_builder import WorkbenchTESBuilder
 from .core.submit_builder import WorkbenchSubmitBuilder
-from .core.minio_builder import WorkbenchMinioBuilder
+from .core.minio_client import WorkbenchMinioClient
 from .common.validate_params import ConfigValidationParams
 from .common.tes_builder_params import TESTaskParams
 
@@ -31,7 +31,7 @@ class Workbench:
         self._validator = WorkbenchValidateBuilder()
         self._task_builder = WorkbenchTESBuilder()
         self._submitter = WorkbenchSubmitBuilder()
-        self._minio_builder = WorkbenchMinioBuilder()
+        self._minio_client = WorkbenchMinioClient()
         self._last_task_id: str | None = None
 
     # ----- Validation Builder -----
@@ -88,7 +88,7 @@ class Workbench:
         self._last_task_id = task_id
         return task_id
 
-    # ----- MinIO Results Builder -----
+    # ----- MinIO Results Commands -----
 
     def fetch_result_by_tre(
         self,
@@ -132,13 +132,13 @@ class Workbench:
                 f"TRE {tre} not found in the configuration. Please specify a valid TRE."
             )
 
-        self._minio_builder.initialise(
+        self._minio_client.initialise(
             config=self._validator.config,
             auth=self._validator.auth,
         )
-        child_task_id = self._minio_builder.get_child_task_id(resolved_id, tre)
+        child_task_id = self._minio_client.get_child_task_id(resolved_id, tre)
 
-        return self._minio_builder.fetch_result(child_task_id, bucket=bucket)
+        return self._minio_client.fetch_result(child_task_id, bucket=bucket)
 
     def fetch_all_results(
         self,
@@ -174,14 +174,12 @@ class Workbench:
 
         results: dict[str, dict[str, Any]] = {}
 
-        self._minio_builder.initialise(
+        self._minio_client.initialise(
             config=self._validator.config,
             auth=self._validator.auth,
         )
         for tre in self._validator.config.tres:
-            child_task_id = self._minio_builder.get_child_task_id(resolved_id, tre)
-            results[tre] = self._minio_builder.fetch_result(
-                child_task_id, bucket=bucket
-            )
+            child_task_id = self._minio_client.get_child_task_id(resolved_id, tre)
+            results[tre] = self._minio_client.fetch_result(child_task_id, bucket=bucket)
 
         return results
