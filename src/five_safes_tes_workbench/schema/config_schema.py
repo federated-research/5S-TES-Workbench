@@ -1,9 +1,18 @@
 from typing import Annotated
-from pydantic import BaseModel, field_validator, ValidationInfo, AnyHttpUrl, BeforeValidator
-from ..common.validator_enums import ConfigKey
 
+from pydantic import (
+    AnyHttpUrl,
+    BaseModel,
+    BeforeValidator,
+    ValidationInfo,
+    field_validator,
+)
+
+from ..common.enums.validator_enums import ConfigParamEnums
+from ..common.exceptions.config_errors import ConfigValidationError
 
 HttpUrlString = Annotated[str, BeforeValidator(lambda v: str(AnyHttpUrl(v)))]
+
 
 class ConfigValidationModel(BaseModel):
     """
@@ -19,6 +28,7 @@ class ConfigValidationModel(BaseModel):
     - minio_output_bucket: The name of the MinIO bucket for output.
     - tres: A list of TREs.
     """
+
     model_config = {"frozen": True}
 
     project: str
@@ -26,35 +36,32 @@ class ConfigValidationModel(BaseModel):
     minio_sts_endpoint: HttpUrlString
     minio_endpoint: str
     minio_output_bucket: str
-    tres: list[str] 
+    tres: list[str]
 
     @field_validator(
-        ConfigKey.PROJECT.value,
-        ConfigKey.TES_BASE_URL.value,
-        ConfigKey.MINIO_STS_ENDPOINT.value,
-        ConfigKey.MINIO_ENDPOINT.value,
-        ConfigKey.MINIO_OUTPUT_BUCKET.value,
-        mode="before"
+        ConfigParamEnums.PROJECT.value,
+        ConfigParamEnums.TES_BASE_URL.value,
+        ConfigParamEnums.MINIO_STS_ENDPOINT.value,
+        ConfigParamEnums.MINIO_ENDPOINT.value,
+        ConfigParamEnums.MINIO_OUTPUT_BUCKET.value,
+        mode="before",
     )
     @classmethod
     def check_not_empty(cls, v: str, info: ValidationInfo) -> str:
         if not v or not v.strip():
-            raise ValueError(f"'{info.field_name}' must not be empty")
+            raise ConfigValidationError([f"'{info.field_name}' must not be empty."])
         return v.strip()
-    
 
-    @field_validator(ConfigKey.TRES.value)
+    @field_validator(ConfigParamEnums.TRES.value)
     @classmethod
     def check_tres_not_empty(cls, v: list[str]) -> list[str]:
         if not v:
-            raise ValueError("Must have at least one 'TRE'. ")
+            raise ConfigValidationError(["Must have at least one 'TRE'."])
+
         cleaned = [item.strip() for item in v]
         for i, item in enumerate(cleaned):
             if not item:
-                raise ValueError(
-                    f"'tres' contains an empty value at index {i}"
+                raise ConfigValidationError(
+                    [f"'tres' contains an empty value at index {i}."]
                 )
         return cleaned
-    
-
-
