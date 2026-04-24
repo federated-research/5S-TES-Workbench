@@ -5,11 +5,12 @@ import csv
 import xml.etree.ElementTree as ET
 from io import StringIO
 from typing import Any
-from urllib.parse import urlparse
 
 import requests
 from minio import Minio
 import minio
+
+from ..helpers.minio import is_https, require_client, require_config
 
 from ..schema.config_schema import ConfigValidationModel
 from ..schema.auth_schema import AuthValidationModel
@@ -58,7 +59,7 @@ class WorkbenchMinioClient:
         bearer = WorkbenchSubmitBuilder._resolve_bearer(auth)
         credentials = self._exchange_token(bearer, config.minio_sts_endpoint)
 
-        secure = _is_https(config.minio_sts_endpoint)
+        secure = is_https(config.minio_sts_endpoint)
 
         self._client = Minio(
             config.minio_endpoint,
@@ -96,8 +97,8 @@ class WorkbenchMinioClient:
         -------
         List of object names found under the task prefix.
         """
-        client = self._require_client()
-        resolved_bucket = bucket or self._require_config().minio_output_bucket
+        client = require_client(self._client)
+        resolved_bucket = bucket or require_config(self._config).minio_output_bucket
         prefix = f"{task_id}/"
 
         try:
@@ -126,8 +127,8 @@ class WorkbenchMinioClient:
         String content of the object, or ``None`` if the object does not
         exist.
         """
-        client = self._require_client()
-        resolved_bucket = bucket or self._require_config().minio_output_bucket
+        client = require_client(self._client)
+        resolved_bucket = bucket or require_config(self._config).minio_output_bucket
 
         try:
             response = client.get_object(resolved_bucket, object_path)
@@ -174,27 +175,6 @@ class WorkbenchMinioClient:
 
         return content
 
-    def get_child_task_id(self, parent_task_id: str, tre: str) -> str:
-        """
-        Get the child task ID for a given task and TRE.
-        """
-        response = requests.get(
-            f"{self._config.tes_base_url.rstrip('/')}/api/Submission/GetChildSubmissionIdByParentAndTre?parentSubmissionId={parent_task_id}&treName={tre}"
-        )
-        response.raise_for_status()
-        if response.status_code != 200:
-            raise RuntimeError(
-                f"Failed to get child task ID: {response.status_code} {response.text}"
-            )
-
-        child_task_id = response.json()
-        if child_task_id is None:
-            raise RuntimeError(
-                f"No child task ID found for parent task {parent_task_id} and TRE {tre}"
-            )
-        logger.info("Child task ID: %s", child_task_id)
-        return child_task_id
-
     def fetch_result(
         self, task_id: str, bucket: str | None = None
     ) -> dict[str, str | dict[str, Any] | list[Any] | None]:
@@ -222,26 +202,6 @@ class WorkbenchMinioClient:
             results[path] = self._parse_result(path, bucket=bucket)
 
         return results
-
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
-    def _require_client(self) -> Minio:
-        if self._client is None:
-            raise ValueError(
-                "MinIO client is not initialised. "
-                "Please call fetch_results() after submit()."
-            )
-        return self._client
-
-    def _require_config(self) -> ConfigValidationModel:
-        if self._config is None:
-            raise ValueError(
-                "MinIO builder has no config. "
-                "Please call fetch_results() after submit()."
-            )
-        return self._config
 
     @staticmethod
     def _exchange_token(bearer: str, sts_endpoint: str) -> dict[str, str]:
@@ -288,17 +248,3 @@ class WorkbenchMinioClient:
             )
             or "",
         }
-
-
-# ------------------------------------------------------------------
-# Module-level helper
-# ------------------------------------------------------------------
-
-
-def _is_https(url: str) -> bool:
-    parsed = urlparse(url)
-    if parsed.scheme == "https":
-        return True
-    if parsed.scheme == "http":
-        return False
-    raise ValueError(f"URL must start with http:// or https://, got: {url!r}")

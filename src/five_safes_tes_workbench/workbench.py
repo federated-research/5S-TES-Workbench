@@ -1,5 +1,7 @@
 from typing import Any, Unpack
 
+from five_safes_tes_workbench.helpers.minio import get_child_task_id
+
 from .core.validate_builder import WorkbenchValidateBuilder
 from .core.tes_builder import WorkbenchTESBuilder
 from .core.submit_builder import WorkbenchSubmitBuilder
@@ -136,7 +138,7 @@ class Workbench:
             config=self._validator.config,
             auth=self._validator.auth,
         )
-        child_task_id = self._minio_client.get_child_task_id(resolved_id, tre)
+        child_task_id = get_child_task_id(self._validator.config, resolved_id, tre)
 
         return self._minio_client.fetch_result(child_task_id, bucket=bucket)
 
@@ -179,7 +181,7 @@ class Workbench:
             auth=self._validator.auth,
         )
         for tre in self._validator.config.tres:
-            child_task_id = self._minio_client.get_child_task_id(resolved_id, tre)
+            child_task_id = get_child_task_id(self._validator.config, resolved_id, tre)
             results[tre] = self._minio_client.fetch_result(child_task_id, bucket=bucket)
 
         return results
