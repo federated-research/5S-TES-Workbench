@@ -1,10 +1,13 @@
 from typing import Unpack
 
-from .core.validate_builder import WorkbenchValidateBuilder
-from .core.tes_builder import WorkbenchTESBuilder
-from .core.submit_builder import WorkbenchSubmitBuilder
-from .common.validate_params import ConfigValidationParams
-from .common.tes_builder_params import TESTaskParams
+from .common.params.tes_builder_params import TESTaskParams
+from .common.params.validate_params import ConfigValidationParams
+from .core.base.submission_protocol import SubmissionProtocol
+from .core.base.tes_builder_protocol import TESBuilderProtocol
+from .core.base.validator_protocol import ValidatorProtocol
+from .core.builders.submit_builder import WorkbenchSubmitBuilder
+from .core.builders.tes_builder import WorkbenchTESBuilder
+from .core.builders.validate_builder import WorkbenchValidateBuilder
 
 
 class Workbench:
@@ -20,14 +23,19 @@ class Workbench:
     3. submit: Submits the TES task to the endpoint.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        validator: ValidatorProtocol | None = None,
+        task_builder: TESBuilderProtocol | None = None,
+        submitter: SubmissionProtocol | None = None,
+    ) -> None:
         """
         Initializes the Workbench with instances of the
         validate builder, TES builder, and submit builder.
         """
-        self._validator = WorkbenchValidateBuilder()
-        self._task_builder = WorkbenchTESBuilder()
-        self._submitter = WorkbenchSubmitBuilder()
+        self._validator = validator or WorkbenchValidateBuilder()
+        self._task_builder = task_builder or WorkbenchTESBuilder()
+        self._submitter = submitter or WorkbenchSubmitBuilder()
 
     # ----- Validation Builder -----
 
@@ -47,14 +55,14 @@ class Workbench:
         """
         self._validator.validate(config_path, **kwargs)
         return self
-    
+
     # ----- TES Builder -----
 
     def build_tes(self, **kwargs: Unpack[TESTaskParams]) -> "Workbench":
-        """ 
-        Builds the TES message and provided TES 
+        """
+        Builds the TES message and provided TES
         task parameters.
-        
+
         Parameters
         ----------
         - kwargs: Parameters for building the TES task.
@@ -68,8 +76,8 @@ class Workbench:
     # ----- Submit Builder -----
 
     def submit(self) -> str:
-        """ 
-        Submits the built TES task to the 
+        """
+        Submits the built TES task to the
         configured TES endpoint.
         """
         return self._submitter.submit(
