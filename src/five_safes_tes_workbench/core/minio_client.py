@@ -1,17 +1,11 @@
 """Builder responsible for fetching task results from MinIO after submission."""
 
-import json
-import csv
-import xml.etree.ElementTree as ET
-from io import StringIO
 from typing import Any
-
 import requests
 from minio import Minio
-import minio
+import xml.etree.ElementTree as ET
 
-from ..helpers.minio import is_https, require_client, require_config
-
+from ..helpers.minio import is_https, list_results, get_and_parse_result
 from ..schema.config_schema import ConfigValidationModel
 from ..schema.auth_schema import AuthValidationModel
 from ..core.submit_builder import WorkbenchSubmitBuilder
@@ -80,101 +74,6 @@ class WorkbenchMinioClient:
     # Public result-fetching methods
     # ------------------------------------------------------------------
 
-    def list_results(self, task_id: str, bucket: str | None = None) -> list[str]:
-        """
-        List all output objects written by a task.
-
-        Objects are expected to live under the ``{task_id}/`` prefix in the
-        configured output bucket.
-
-        Parameters
-        ----------
-        - task_id: ID returned by the TES submission.
-        - bucket: Override the bucket from config. Defaults to
-          ``config.minio_output_bucket``.
-
-        Returns
-        -------
-        List of object names found under the task prefix.
-        """
-        client = require_client(self._client)
-        resolved_bucket = bucket or require_config(self._config).minio_output_bucket
-        prefix = f"{task_id}/"
-
-        try:
-            objects = client.list_objects(
-                resolved_bucket, prefix=prefix, recursive=True
-            )
-            names = [obj.object_name for obj in objects]
-            logger.info("Found %d result object(s) for task %s", len(names), task_id)
-            return names
-        except Exception as e:
-            logger.error("Error listing results for task %s: %s", task_id, e)
-            raise
-
-    def get_result(self, object_path: str, bucket: str | None = None) -> str | None:
-        """
-        Fetch a single result object as a raw UTF-8 string.
-
-        Parameters
-        ----------
-        - object_path: Full object path within the bucket (e.g.
-          ``"<task_id>/stdout"``)
-        - bucket: Override the bucket from config.
-
-        Returns
-        -------
-        String content of the object, or ``None`` if the object does not
-        exist.
-        """
-        client = require_client(self._client)
-        resolved_bucket = bucket or require_config(self._config).minio_output_bucket
-
-        try:
-            response = client.get_object(resolved_bucket, object_path)
-            content = response.read().decode("utf-8")
-            response.close()
-            response.release_conn()
-            return content
-        except minio.error.S3Error as e:
-            if e.code == "NoSuchKey":
-                logger.warning("Object not found: %s", object_path)
-                return None
-            raise
-
-    def _parse_result(
-        self, object_path: str, bucket: str | None = None
-    ) -> str | dict[str, Any] | list[Any] | None:
-        """
-        Fetch a single result object and auto-detect its format.
-
-        Attempts JSON first, then CSV (returning the first row as a dict),
-        then falls back to a raw string.
-
-        Parameters
-        ----------
-        - object_path: Full object path within the bucket.
-        - bucket: Override the bucket from config.
-        """
-        content = self.get_result(object_path, bucket=bucket)
-        if content is None:
-            return None
-
-        try:
-            return json.loads(content)
-        except json.JSONDecodeError:
-            pass
-
-        try:
-            reader = csv.DictReader(StringIO(content))
-            rows = list(reader)
-            if rows:
-                return rows
-        except Exception:
-            pass
-
-        return content
-
     def fetch_result(
         self, task_id: str, bucket: str | None = None
     ) -> dict[str, str | dict[str, Any] | list[Any] | None]:
@@ -194,12 +93,14 @@ class WorkbenchMinioClient:
         -------
         Dict mapping each object path to its parsed content.
         """
-        object_paths = self.list_results(task_id, bucket=bucket)
+        object_paths = list_results(self._client, self._config, task_id, bucket=bucket)
 
         results: dict[str, str | dict[str, Any] | list[Any] | None] = {}
         for path in object_paths:
             logger.info("Fetching result object: %s", path)
-            results[path] = self._parse_result(path, bucket=bucket)
+            results[path] = get_and_parse_result(
+                self._client, self._config, path, bucket=bucket
+            )
 
         return results
 
