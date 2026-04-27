@@ -1,11 +1,10 @@
 from typing import Any, Unpack
 
-from five_safes_tes_workbench.helpers.minio import get_child_task_id
-
 from .core.validate_builder import WorkbenchValidateBuilder
 from .core.tes_builder import WorkbenchTESBuilder
 from .core.submit_builder import WorkbenchSubmitBuilder
 from .core.minio_client import WorkbenchMinioClient
+from .helpers.minio import check_child_task_status, get_child_task_info
 from .common.validate_params import ConfigValidationParams
 from .common.tes_builder_params import TESTaskParams
 
@@ -138,9 +137,12 @@ class Workbench:
             config=self._validator.config,
             auth=self._validator.auth,
         )
-        child_task_id = get_child_task_id(self._validator.config, resolved_id, tre)
+        child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
 
-        return self._minio_client.fetch_result(child_task_id, bucket=bucket)
+        check_status_message = check_child_task_status(child_task_info)
+        if check_status_message:
+            return check_status_message
+        return self._minio_client.fetch_result(child_task_info.id, bucket=bucket)
 
     def fetch_all_results(
         self,
@@ -181,7 +183,14 @@ class Workbench:
             auth=self._validator.auth,
         )
         for tre in self._validator.config.tres:
-            child_task_id = get_child_task_id(self._validator.config, resolved_id, tre)
-            results[tre] = self._minio_client.fetch_result(child_task_id, bucket=bucket)
+            child_task_info = get_child_task_info(
+                self._validator.config, resolved_id, tre
+            )
+            check_status_message = check_child_task_status(child_task_info)
+            if check_status_message:
+                return check_status_message
+            results[tre] = self._minio_client.fetch_result(
+                child_task_info.id, bucket=bucket
+            )
 
         return results
