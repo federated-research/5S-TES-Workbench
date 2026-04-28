@@ -17,7 +17,7 @@ _STS_NS = {"sts": "https://sts.amazonaws.com/doc/2011-06-15/"}
 _STS_DURATION_SECONDS = "3600"
 
 
-class WorkbenchMinioClient:
+class MinioClientBuilder:
     """
     Builder responsible for connecting to MinIO and retrieving task
     output objects after a TES task has completed.

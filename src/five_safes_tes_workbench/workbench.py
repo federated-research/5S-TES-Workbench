@@ -3,7 +3,7 @@ from typing import Any, Unpack
 from .core.validate_builder import WorkbenchValidateBuilder
 from .core.tes_builder import WorkbenchTESBuilder
 from .core.submit_builder import WorkbenchSubmitBuilder
-from .core.minio_client import WorkbenchMinioClient
+from .core.minio_client import MinioClientBuilder
 from .helpers.minio import check_child_task_status, get_child_task_info
 from .common.validate_params import ConfigValidationParams
 from .common.tes_builder_params import TESTaskParams
@@ -32,7 +32,7 @@ class Workbench:
         self._validator = WorkbenchValidateBuilder()
         self._task_builder = WorkbenchTESBuilder()
         self._submitter = WorkbenchSubmitBuilder()
-        self._minio_client = WorkbenchMinioClient()
+        self._minio_client = MinioClientBuilder()
         self._last_task_id: str | None = None
 
     # ----- Validation Builder -----
