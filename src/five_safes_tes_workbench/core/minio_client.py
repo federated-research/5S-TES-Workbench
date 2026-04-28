@@ -6,9 +6,9 @@ from minio import Minio
 import xml.etree.ElementTree as ET
 
 from ..helpers.minio import is_https, list_results, get_and_parse_result
+from ..helpers.auth import resolve_bearer
 from ..schema.config_schema import ConfigValidationModel
 from ..schema.auth_schema import AuthValidationModel
-from ..core.submit_builder import WorkbenchSubmitBuilder
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -50,7 +50,7 @@ class MinioClientBuilder:
         - auth: Validated authentication details used to obtain the bearer
           token.
         """
-        bearer = WorkbenchSubmitBuilder._resolve_bearer(auth)
+        bearer = resolve_bearer(auth)
         credentials = self._exchange_token(bearer, config.minio_sts_endpoint)
 
         secure = is_https(config.minio_sts_endpoint)
