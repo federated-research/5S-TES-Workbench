@@ -91,7 +91,7 @@ class Workbench:
 
     # ----- MinIO Results Commands -----
 
-    def fetch_result_by_tre(
+    def fetch_results_by_tre(
         self,
         task_id: str | None = None,
         tre: str | None = None,
@@ -212,13 +212,13 @@ class Workbench:
             check_status_message = check_child_task_status(child_task_info)
             if check_status_message is not None:
                 raise ValueError(check_status_message)
-            base_dir = (
+            resolved_output_dir = (
                 Path(output_dir)
                 if output_dir is not None
                 else Path.cwd() / "output" / tre / str(child_task_info.id)
             )
             results[tre] = minio_client.download_results(
-                child_task_info.id, base_dir, bucket=bucket
+                child_task_info.id, resolved_output_dir, bucket=bucket
             )
 
         return results
