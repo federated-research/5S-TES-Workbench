@@ -39,11 +39,7 @@ class ConfigValidationModel(BaseModel):
     tres: list[str]
 
     @field_validator(
-        ConfigParamEnums.PROJECT.value,
-        ConfigParamEnums.TES_BASE_URL.value,
-        ConfigParamEnums.MINIO_STS_ENDPOINT.value,
-        ConfigParamEnums.MINIO_ENDPOINT.value,
-        ConfigParamEnums.MINIO_OUTPUT_BUCKET.value,
+        *[e.value for e in ConfigParamEnums if e != ConfigParamEnums.TRES],
         mode="before",
     )
     @classmethod
