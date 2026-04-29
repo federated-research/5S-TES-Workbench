@@ -2,9 +2,6 @@ from typing import Unpack
 
 from .common.params.tes_builder_params import TESTaskParams
 from .common.params.validate_params import ConfigValidationParams
-from .core.base.submission_protocol import SubmissionProtocol
-from .core.base.tes_builder_protocol import TESBuilderProtocol
-from .core.base.validator_protocol import ValidatorProtocol
 from .core.builders.submit_builder import WorkbenchSubmitBuilder
 from .core.builders.tes_builder import WorkbenchTESBuilder
 from .core.builders.validate_builder import WorkbenchValidateBuilder
@@ -25,9 +22,9 @@ class Workbench:
 
     def __init__(
         self,
-        validator: ValidatorProtocol | None = None,
-        task_builder: TESBuilderProtocol | None = None,
-        submitter: SubmissionProtocol | None = None,
+        validator: WorkbenchValidateBuilder | None = None,
+        task_builder: WorkbenchTESBuilder | None = None,
+        submitter: WorkbenchSubmitBuilder | None = None,
     ) -> None:
         """
         Initializes the Workbench with instances of the
