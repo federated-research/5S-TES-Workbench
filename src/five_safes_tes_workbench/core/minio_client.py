@@ -10,7 +10,7 @@ from ..helpers.minio import (
     exchange_minio_token,
 )
 from ..helpers.auth import resolve_bearer
-from ..helpers.url import is_https
+from ..helpers.url import is_https, strip_scheme
 from ..schema.config_schema import ConfigValidationModel
 from ..schema.auth_schema import AuthValidationModel
 from ..utils.logger import get_logger
@@ -43,10 +43,11 @@ class MinioClientBuilder:
         """
         bearer = resolve_bearer(auth)
         credentials = exchange_minio_token(bearer, config.minio_sts_endpoint)
-        # Check if the MinIO endpoint is HTTPS
         secure = is_https(config.minio_endpoint)
+        # Minio() only accepts host:port — strip any http(s):// prefix.
+        endpoint = strip_scheme(config.minio_endpoint)
         self._client = Minio(
-            config.minio_endpoint,
+            endpoint,
             access_key=credentials.access_key,
             secret_key=credentials.secret_key,
             session_token=credentials.session_token,
