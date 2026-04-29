@@ -5,6 +5,12 @@ import requests
 from minio import Minio
 import xml.etree.ElementTree as ET
 
+from ..constants.minio import (
+    STS_DURATION_SECONDS,
+    STS_NAMESPACE,
+    STS_TOKEN_EXCHANGE_TIMEOUT,
+)
+
 from ..helpers.minio import list_results, get_and_parse_result
 from ..helpers.auth import resolve_bearer
 from ..helpers.url import is_https
@@ -13,9 +19,6 @@ from ..schema.auth_schema import AuthValidationModel
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-_STS_NS = {"sts": "https://sts.amazonaws.com/doc/2011-06-15/"}
-_STS_DURATION_SECONDS = "3600"
 
 
 class MinioClientBuilder:
@@ -105,10 +108,10 @@ class MinioClientBuilder:
             data={
                 "Action": "AssumeRoleWithWebIdentity",
                 "Version": "2011-06-15",
-                "DurationSeconds": _STS_DURATION_SECONDS,
+                "DurationSeconds": STS_DURATION_SECONDS,
                 "WebIdentityToken": bearer,
             },
-            timeout=30,
+            timeout=STS_TOKEN_EXCHANGE_TIMEOUT,
         )
 
         if response.status_code != 200:
@@ -117,20 +120,22 @@ class MinioClientBuilder:
             )
 
         root = ET.fromstring(response.text)
-        credentials = root.find(".//sts:Credentials", _STS_NS)
+        credentials = root.find(".//sts:Credentials", STS_NAMESPACE)
 
         if credentials is None:
             raise RuntimeError("STS response contained no Credentials element")
 
         return {
-            "access_key": credentials.findtext("sts:AccessKeyId", namespaces=_STS_NS)
+            "access_key": credentials.findtext(
+                "sts:AccessKeyId", namespaces=STS_NAMESPACE
+            )
             or "",
             "secret_key": credentials.findtext(
-                "sts:SecretAccessKey", namespaces=_STS_NS
+                "sts:SecretAccessKey", namespaces=STS_NAMESPACE
             )
             or "",
             "session_token": credentials.findtext(
-                "sts:SessionToken", namespaces=_STS_NS
+                "sts:SessionToken", namespaces=STS_NAMESPACE
             )
             or "",
         }
