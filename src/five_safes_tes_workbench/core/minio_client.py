@@ -5,8 +5,9 @@ import requests
 from minio import Minio
 import xml.etree.ElementTree as ET
 
-from ..helpers.minio import is_https, list_results, get_and_parse_result
+from ..helpers.minio import list_results, get_and_parse_result
 from ..helpers.auth import resolve_bearer
+from ..helpers.url import is_https
 from ..schema.config_schema import ConfigValidationModel
 from ..schema.auth_schema import AuthValidationModel
 from ..utils.logger import get_logger
