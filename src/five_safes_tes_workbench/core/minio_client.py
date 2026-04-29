@@ -37,8 +37,8 @@ class MinioClientBuilder:
         """
         bearer = resolve_bearer(auth)
         credentials = exchange_minio_token(bearer, config.minio_sts_endpoint)
-
-        secure = is_https(config.minio_sts_endpoint)
+        # Check if the MinIO endpoint is HTTPS
+        secure = is_https(config.minio_endpoint)
         self._client = Minio(
             config.minio_endpoint,
             access_key=credentials.access_key,
