@@ -54,7 +54,7 @@ def get_child_task_info(
     )
 
 
-def check_child_task_status(child_task_info: ChildTaskInfo) -> str | None:
+def validate_child_task_status(child_task_info: ChildTaskInfo) -> None:
     """
     Check the status of a child task and return an error message if the task is not completed.
 
@@ -71,10 +71,11 @@ def check_child_task_status(child_task_info: ChildTaskInfo) -> str | None:
         or child_task_info.status == TaskStatus.CANCELLED
         or child_task_info.status == TaskStatus.FAILURE
     ):
-        return (
+        raise RuntimeError(
             f"Child task {child_task_info.id} is failed or cancelled. Please try again."
         )
 
     elif child_task_info.status != TaskStatus.COMPLETED:
-        return f"Child task {child_task_info.id} is not completed, so results are not available yet. Please wait for the task to complete and try again. Current status: {TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)]}"
-    return None
+        raise RuntimeError(
+            f"Child task {child_task_info.id} is not completed or failed, so results are not available yet. Current status: {TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)]}"
+        )

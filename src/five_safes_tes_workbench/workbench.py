@@ -5,7 +5,10 @@ from .core.validate_builder import WorkbenchValidateBuilder
 from .core.tes_builder import WorkbenchTESBuilder
 from .core.submit_builder import WorkbenchSubmitBuilder
 from .core.minio_client import MinioClientBuilder
-from .helpers.children_task import check_child_task_status, get_child_task_info
+from .helpers.children_task import (
+    get_child_task_info,
+    validate_child_task_status,
+)
 from .common.validate_params import ConfigValidationParams
 from .common.tes_builder_params import TESTaskParams
 
@@ -140,9 +143,7 @@ class Workbench:
             )
         child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
 
-        check_status_message = check_child_task_status(child_task_info)
-        if check_status_message is not None:
-            raise ValueError(check_status_message)
+        validate_child_task_status(child_task_info)
 
         resolved_output_dir = (
             Path(output_dir)
@@ -209,9 +210,8 @@ class Workbench:
             child_task_info = get_child_task_info(
                 self._validator.config, resolved_id, tre
             )
-            check_status_message = check_child_task_status(child_task_info)
-            if check_status_message is not None:
-                raise ValueError(check_status_message)
+            validate_child_task_status(child_task_info)
+
             resolved_output_dir = (
                 Path(output_dir)
                 if output_dir is not None
