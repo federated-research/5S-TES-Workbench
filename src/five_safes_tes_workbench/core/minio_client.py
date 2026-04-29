@@ -125,17 +125,19 @@ class MinioClientBuilder:
         if credentials is None:
             raise RuntimeError("STS response contained no Credentials element")
 
+        access_key = credentials.findtext("sts:AccessKeyId", namespaces=STS_NAMESPACE)
+        secret_key = credentials.findtext(
+            "sts:SecretAccessKey", namespaces=STS_NAMESPACE
+        )
+        session_token = credentials.findtext(
+            "sts:SessionToken", namespaces=STS_NAMESPACE
+        )
+
+        if access_key is None or secret_key is None or session_token is None:
+            raise RuntimeError("STS response did not contain all required credentials")
+
         return {
-            "access_key": credentials.findtext(
-                "sts:AccessKeyId", namespaces=STS_NAMESPACE
-            )
-            or "",
-            "secret_key": credentials.findtext(
-                "sts:SecretAccessKey", namespaces=STS_NAMESPACE
-            )
-            or "",
-            "session_token": credentials.findtext(
-                "sts:SessionToken", namespaces=STS_NAMESPACE
-            )
-            or "",
+            "access_key": access_key,
+            "secret_key": secret_key,
+            "session_token": session_token,
         }
