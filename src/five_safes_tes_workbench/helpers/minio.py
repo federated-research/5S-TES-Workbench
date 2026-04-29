@@ -1,13 +1,39 @@
 import csv
+from dataclasses import dataclass
 import json
 from typing import Any
 from io import StringIO
 from minio import Minio
 import minio
+import requests
+import xml.etree.ElementTree as ET
+
+from ..constants.minio import (
+    STS_DURATION_SECONDS,
+    STS_NAMESPACE,
+    STS_TOKEN_EXCHANGE_TIMEOUT,
+)
 from ..schema.config_schema import ConfigValidationModel
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+
+@dataclass
+class MinioCredentials:
+    """
+    MinIO credentials type.
+
+    Attributes:
+    -----------
+    - access_key: The access key for the MinIO client.
+    - secret_key: The secret key for the MinIO client.
+    - session_token: The session token for the MinIO client.
+    """
+
+    access_key: str
+    secret_key: str
+    session_token: str
 
 
 def list_results(
@@ -104,3 +130,62 @@ def get_and_parse_result(
             logger.warning("Object not found: %s", object_path)
             return None
         raise
+
+
+def _parse_sts_response(response: requests.Response) -> MinioCredentials:
+    """
+    Parse and validate the STS response and return the credentials.
+
+    Parameters
+    ----------
+    - response: The response from the STS endpoint.
+
+    Returns
+    -------
+    A MinioCredentials object.
+    """
+    root = ET.fromstring(response.text)
+    credentials = root.find(".//sts:Credentials", STS_NAMESPACE)
+
+    if credentials is None:
+        raise RuntimeError("STS response contained no Credentials element")
+
+    access_key = credentials.findtext("sts:AccessKeyId", namespaces=STS_NAMESPACE)
+    secret_key = credentials.findtext("sts:SecretAccessKey", namespaces=STS_NAMESPACE)
+    session_token = credentials.findtext("sts:SessionToken", namespaces=STS_NAMESPACE)
+
+    if access_key is None or secret_key is None or session_token is None:
+        raise RuntimeError("STS response did not contain all required credentials")
+
+    return MinioCredentials(
+        access_key=access_key, secret_key=secret_key, session_token=session_token
+    )
+
+
+def exchange_minio_token(bearer: str, sts_endpoint: str) -> MinioCredentials:
+    """
+    Call the STS AssumeRoleWithWebIdentity action and return temporary
+    AWS-style credentials.
+    """
+    logger.info(
+        "Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint
+    )
+
+    response = requests.post(
+        sts_endpoint,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={
+            "Action": "AssumeRoleWithWebIdentity",
+            "Version": "2011-06-15",
+            "DurationSeconds": STS_DURATION_SECONDS,
+            "WebIdentityToken": bearer,
+        },
+        timeout=STS_TOKEN_EXCHANGE_TIMEOUT,
+    )
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"STS token exchange failed ({response.status_code}): {response.text}"
+        )
+
+    return _parse_sts_response(response)

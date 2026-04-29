@@ -1,17 +1,8 @@
 """Builder responsible for fetching task results from MinIO after submission."""
 
 from typing import Any
-import requests
 from minio import Minio
-import xml.etree.ElementTree as ET
-
-from ..constants.minio import (
-    STS_DURATION_SECONDS,
-    STS_NAMESPACE,
-    STS_TOKEN_EXCHANGE_TIMEOUT,
-)
-
-from ..helpers.minio import list_results, get_and_parse_result
+from ..helpers.minio import list_results, get_and_parse_result, exchange_minio_token
 from ..helpers.auth import resolve_bearer
 from ..helpers.url import is_https
 from ..schema.config_schema import ConfigValidationModel
@@ -45,14 +36,14 @@ class MinioClientBuilder:
           token.
         """
         bearer = resolve_bearer(auth)
-        credentials = self._exchange_token(bearer, config.minio_sts_endpoint)
+        credentials = exchange_minio_token(bearer, config.minio_sts_endpoint)
 
         secure = is_https(config.minio_sts_endpoint)
         self._client = Minio(
             config.minio_endpoint,
-            access_key=credentials["access_key"],
-            secret_key=credentials["secret_key"],
-            session_token=credentials["session_token"],
+            access_key=credentials.access_key,
+            secret_key=credentials.secret_key,
+            session_token=credentials.session_token,
             secure=secure,
         )
         self._config = config
@@ -91,53 +82,3 @@ class MinioClientBuilder:
             )
 
         return results
-
-    @staticmethod
-    def _exchange_token(bearer: str, sts_endpoint: str) -> dict[str, str]:
-        """
-        Call the STS AssumeRoleWithWebIdentity action and return temporary
-        AWS-style credentials.
-        """
-        logger.info(
-            "Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint
-        )
-
-        response = requests.post(
-            sts_endpoint,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data={
-                "Action": "AssumeRoleWithWebIdentity",
-                "Version": "2011-06-15",
-                "DurationSeconds": STS_DURATION_SECONDS,
-                "WebIdentityToken": bearer,
-            },
-            timeout=STS_TOKEN_EXCHANGE_TIMEOUT,
-        )
-
-        if response.status_code != 200:
-            raise RuntimeError(
-                f"STS token exchange failed ({response.status_code}): {response.text}"
-            )
-
-        root = ET.fromstring(response.text)
-        credentials = root.find(".//sts:Credentials", STS_NAMESPACE)
-
-        if credentials is None:
-            raise RuntimeError("STS response contained no Credentials element")
-
-        access_key = credentials.findtext("sts:AccessKeyId", namespaces=STS_NAMESPACE)
-        secret_key = credentials.findtext(
-            "sts:SecretAccessKey", namespaces=STS_NAMESPACE
-        )
-        session_token = credentials.findtext(
-            "sts:SessionToken", namespaces=STS_NAMESPACE
-        )
-
-        if access_key is None or secret_key is None or session_token is None:
-            raise RuntimeError("STS response did not contain all required credentials")
-
-        return {
-            "access_key": access_key,
-            "secret_key": secret_key,
-            "session_token": session_token,
-        }
