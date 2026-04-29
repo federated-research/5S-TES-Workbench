@@ -32,7 +32,6 @@ class Workbench:
         self._validator = WorkbenchValidateBuilder()
         self._task_builder = WorkbenchTESBuilder()
         self._submitter = WorkbenchSubmitBuilder()
-        self._minio_client = MinioClientBuilder()
         self._last_task_id: str | None = None
 
     # ----- Validation Builder -----
@@ -133,16 +132,17 @@ class Workbench:
                 f"TRE {tre} not found in the configuration. Please specify a valid TRE."
             )
 
-        self._minio_client.initialise(
+        #  init Minio client on demand
+        minio_client = MinioClientBuilder(
             config=self._validator.config,
             auth=self._validator.auth,
         )
         child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
 
         check_status_message = check_child_task_status(child_task_info)
-        if check_status_message:
-            return check_status_message
-        return self._minio_client.fetch_result(child_task_info.id, bucket=bucket)
+        if check_status_message is not None:
+            raise ValueError(check_status_message)
+        return minio_client.fetch_result(child_task_info.id, bucket=bucket)
 
     def fetch_all_results(
         self,
@@ -178,7 +178,8 @@ class Workbench:
 
         results: dict[str, dict[str, Any]] = {}
 
-        self._minio_client.initialise(
+        #  init Minio client on demand
+        minio_client = MinioClientBuilder(
             config=self._validator.config,
             auth=self._validator.auth,
         )
@@ -187,10 +188,8 @@ class Workbench:
                 self._validator.config, resolved_id, tre
             )
             check_status_message = check_child_task_status(child_task_info)
-            if check_status_message:
-                return check_status_message
-            results[tre] = self._minio_client.fetch_result(
-                child_task_info.id, bucket=bucket
-            )
+            if check_status_message is not None:
+                raise ValueError(check_status_message)
+            results[tre] = minio_client.fetch_result(child_task_info.id, bucket=bucket)
 
         return results

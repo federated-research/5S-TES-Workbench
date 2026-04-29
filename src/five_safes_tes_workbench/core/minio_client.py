@@ -27,18 +27,8 @@ class MinioClientBuilder:
     configured STS endpoint (AssumeRoleWithWebIdentity).
     """
 
-    def __init__(self) -> None:
-        self._client: Minio | None = None
-        self._config: ConfigValidationModel | None = None
-
-    # ------------------------------------------------------------------
-    # Initialisation
-    # ------------------------------------------------------------------
-
-    def initialise(
-        self,
-        config: ConfigValidationModel,
-        auth: AuthValidationModel,
+    def __init__(
+        self, config: ConfigValidationModel, auth: AuthValidationModel
     ) -> None:
         """
         Exchange the bearer token for temporary MinIO credentials via STS
@@ -55,7 +45,6 @@ class MinioClientBuilder:
         credentials = self._exchange_token(bearer, config.minio_sts_endpoint)
 
         secure = is_https(config.minio_sts_endpoint)
-
         self._client = Minio(
             config.minio_endpoint,
             access_key=credentials["access_key"],
@@ -64,16 +53,11 @@ class MinioClientBuilder:
             secure=secure,
         )
         self._config = config
-
         logger.info(
             "MinIO client initialised (endpoint=%s, secure=%s)",
             config.minio_endpoint,
             secure,
         )
-
-    # ------------------------------------------------------------------
-    # Public result-fetching methods
-    # ------------------------------------------------------------------
 
     def fetch_result(
         self, task_id: str, bucket: str | None = None
