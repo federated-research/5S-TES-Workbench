@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 import tes  # type: ignore
 
 from ...common.params.tes_builder_params import TESTaskParams
-from ...core.base.tes_builder_protocol import TESBuilderProtocol
 from ...schema.config_schema import ConfigValidationModel
 from ...utils.logger import get_logger
 
@@ -17,7 +16,7 @@ _DEFAULT_OUTPUT_URL = "s3://"
 _DEFAULT_OUTPUT_PATH = "/outputs"
 
 
-class WorkbenchTESBuilder(TESBuilderProtocol):
+class WorkbenchTESBuilder():
     """
     Builder class responsible for constructing TES tasks
     based on the validated configuration and
@@ -70,25 +69,30 @@ class WorkbenchTESBuilder(TESBuilderProtocol):
         output_url = params.get("output_url", _DEFAULT_OUTPUT_URL)
         output_path = params.get("output_path", _DEFAULT_OUTPUT_PATH)
 
+        _inputs: list[tes.Input] = []
+        _outputs = [
+            tes.Output(
+                name="Stdout",
+                description="Stdout results",
+                url=output_url,
+                path=output_path,
+                type="DIRECTORY",
+            )
+        ]
+        _executors = [tes.Executor(image=image, command=command)]
+        _tags = {
+            "project": config.project,
+            "tres": ",".join(config.tres),
+        }
+
         self._tes_task = tes.Task(
             name=name,
             description=description,
-            inputs=[],
-            outputs=[
-                tes.Output(
-                    name="Stdout",
-                    description="Stdout results",
-                    url=output_url,
-                    path=output_path,
-                    type="DIRECTORY",
-                )
-            ],
-            executors=[tes.Executor(image=image, command=command)],
+            inputs=_inputs,
+            outputs=_outputs,
+            executors=_executors,
             volumes=None,
-            tags={
-                "project": config.project,
-                "tres": ",".join(config.tres),
-            },
+            tags=_tags,
             logs=None,
             creation_time=datetime.now(timezone.utc),
         )

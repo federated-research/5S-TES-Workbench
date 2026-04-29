@@ -3,7 +3,6 @@ import tes  # type: ignore
 
 from ...common.enums.validator_enums import AuthMode
 from ...common.exceptions.submission_errors import SubmissionError
-from ...core.base.submission_protocol import SubmissionProtocol
 from ...schema.auth_schema import AuthValidationModel
 from ...schema.config_schema import ConfigValidationModel
 from ...utils.logger import get_logger
@@ -11,7 +10,7 @@ from ...utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-class WorkbenchSubmitBuilder(SubmissionProtocol):
+class WorkbenchSubmitBuilder():
     """
     Builder class responsible for submitting TES tasks
     to the Submission API.
