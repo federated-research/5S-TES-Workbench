@@ -76,11 +76,7 @@ class AuthValidationModel(BaseModel):
 
     def _validate_credentials(self) -> None:
         credential_fields = [
-            AuthParamEnums.CLIENT_ID.value,
-            AuthParamEnums.CLIENT_SECRET.value,
-            AuthParamEnums.KEYCLOAK_URL.value,
-            AuthParamEnums.USERNAME.value,
-            AuthParamEnums.PASSWORD.value,
+            e.value for e in AuthParamEnums if e != AuthParamEnums.ACCESS_TOKEN
         ]
         missing = [
             field
