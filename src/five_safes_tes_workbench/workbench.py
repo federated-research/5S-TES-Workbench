@@ -138,20 +138,22 @@ class Workbench:
             raise ValueError(
                 f"TRE {tre} not found in the configuration. Please specify a valid TRE."
             )
+        child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
+
+        check_status_message = check_child_task_status(child_task_info)
+        if check_status_message is not None:
+            raise ValueError(check_status_message)
 
         resolved_output_dir = (
-            Path(output_dir) if output_dir is not None else Path.cwd() / "output" / tre
+            Path(output_dir)
+            if output_dir is not None
+            else Path.cwd() / "output" / tre / str(child_task_info.id)
         )
 
         minio_client = MinioClientBuilder(
             config=self._validator.config,
             auth=self._validator.auth,
         )
-        child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
-
-        check_status_message = check_child_task_status(child_task_info)
-        if check_status_message is not None:
-            raise ValueError(check_status_message)
 
         return minio_client.download_results(
             child_task_info.id, resolved_output_dir, bucket=bucket
@@ -197,10 +199,6 @@ class Workbench:
                 "a task_id explicitly to fetch_all_results()."
             )
 
-        base_dir = (
-            Path(output_dir) if output_dir is not None else Path.cwd() / "output"
-        )
-
         results: dict[str, list[Path]] = {}
 
         minio_client = MinioClientBuilder(
@@ -214,8 +212,13 @@ class Workbench:
             check_status_message = check_child_task_status(child_task_info)
             if check_status_message is not None:
                 raise ValueError(check_status_message)
+            base_dir = (
+                Path(output_dir)
+                if output_dir is not None
+                else Path.cwd() / "output" / tre / str(child_task_info.id)
+            )
             results[tre] = minio_client.download_results(
-                child_task_info.id, base_dir / tre, bucket=bucket
+                child_task_info.id, base_dir, bucket=bucket
             )
 
         return results
