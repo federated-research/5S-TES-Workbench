@@ -1,11 +1,9 @@
 """Builder responsible for fetching task results from MinIO after submission."""
 
 from pathlib import Path
-from typing import Any
 from minio import Minio
 from ..helpers.minio import (
     list_results,
-    get_and_parse_result,
     download_result,
     exchange_minio_token,
 )
@@ -59,36 +57,6 @@ class MinioClientBuilder:
             config.minio_endpoint,
             secure,
         )
-
-    def fetch_result(
-        self, task_id: str, bucket: str | None = None
-    ) -> dict[str, str | dict[str, Any] | list[Any] | None]:
-        """
-        Fetch all output objects for a task and return them as a mapping
-        of ``object_path -> parsed_content``.
-
-        Uses :meth:`get_result_parsed` for each object so content is
-        automatically decoded from JSON / CSV where possible.
-
-        Parameters
-        ----------
-        - task_id: ID returned by the TES submission.
-        - bucket: Override the bucket from config.
-
-        Returns
-        -------
-        Dict mapping each object path to its parsed content.
-        """
-        object_paths = list_results(self._client, self._config, task_id, bucket=bucket)
-
-        results: dict[str, str | dict[str, Any] | list[Any] | None] = {}
-        for path in object_paths:
-            logger.info("Fetching result object: %s", path)
-            results[path] = get_and_parse_result(
-                self._client, self._config, path, bucket=bucket
-            )
-
-        return results
 
     def download_results(
         self,
