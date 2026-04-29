@@ -1,4 +1,5 @@
-from typing import Any, Unpack
+from pathlib import Path
+from typing import Unpack
 
 from .core.validate_builder import WorkbenchValidateBuilder
 from .core.tes_builder import WorkbenchTESBuilder
@@ -95,9 +96,14 @@ class Workbench:
         task_id: str | None = None,
         tre: str | None = None,
         bucket: str | None = None,
-    ) -> dict[str, Any]:
+        output_dir: Path | str | None = None,
+    ) -> list[Path]:
         """
-        Fetch all output objects written by a completed TES task from MinIO.
+        Download all output objects for a completed TES task from MinIO to disk.
+
+        Files are saved under ``<output_dir>/<filename>`` where
+        ``output_dir`` defaults to an ``output/`` folder created next to
+        the calling notebook (i.e. ``Path.cwd() / "output"``).
 
         Authentication is re-used from the earlier :meth:`validate` call.
         Credentials are exchanged at the configured STS endpoint so that a
@@ -107,20 +113,21 @@ class Workbench:
         ----------
         - task_id: ID of the task whose results to retrieve. Defaults to
           the ID returned by the most recent :meth:`submit` call.
-        - tre: Name of the TRE to fetch the results for.
+        - tre: Name of the TRE to download the results for.
         - bucket: Override the output bucket from config. Defaults to
           ``config.minio_output_bucket``.
+        - output_dir: Directory to write downloaded files into. Defaults
+          to ``Path.cwd() / "output" / <tre>``.
 
         Returns
         -------
-        A dict mapping each result object path to its parsed content
-        (JSON / CSV decoded where possible, raw string otherwise).
+        List of :class:`~pathlib.Path` objects for every downloaded file.
         """
         resolved_id = task_id or self._last_task_id
         if resolved_id is None:
             raise ValueError(
                 "No Submission task ID available. Either call submit() first or pass "
-                "a task_id explicitly to fetch_results()."
+                "a task_id explicitly to fetch_result_by_tre()."
             )
 
         if tre is None:
@@ -132,7 +139,10 @@ class Workbench:
                 f"TRE {tre} not found in the configuration. Please specify a valid TRE."
             )
 
-        #  init Minio client on demand
+        resolved_output_dir = (
+            Path(output_dir) if output_dir is not None else Path.cwd() / "output" / tre
+        )
+
         minio_client = MinioClientBuilder(
             config=self._validator.config,
             auth=self._validator.auth,
@@ -142,15 +152,24 @@ class Workbench:
         check_status_message = check_child_task_status(child_task_info)
         if check_status_message is not None:
             raise ValueError(check_status_message)
-        return minio_client.fetch_result(child_task_info.id, bucket=bucket)
+
+        return minio_client.download_results(
+            child_task_info.id, resolved_output_dir, bucket=bucket
+        )
 
     def fetch_all_results(
         self,
         task_id: str | None = None,
         bucket: str | None = None,
-    ) -> dict[str, Any]:
+        output_dir: Path | str | None = None,
+    ) -> dict[str, list[Path]]:
         """
-        Fetch all output objects written by a completed TES task from MinIO.
+        Download all output objects for a completed TES task from MinIO to disk
+        for every configured TRE.
+
+        Files are saved under ``<output_dir>/<tre>/<filename>`` where
+        ``output_dir`` defaults to an ``output/`` folder created next to
+        the calling notebook (i.e. ``Path.cwd() / "output"``).
 
         Authentication is re-used from the earlier :meth:`validate` call.
         Credentials are exchanged at the configured STS endpoint so that a
@@ -160,25 +179,30 @@ class Workbench:
         ----------
         - task_id: ID of the task whose results to retrieve. Defaults to
           the ID returned by the most recent :meth:`submit` call.
-        - tre: Name of the TRE to fetch the results for.
         - bucket: Override the output bucket from config. Defaults to
           ``config.minio_output_bucket``.
+        - output_dir: Root directory for downloads. Each TRE gets its own
+          sub-folder ``<output_dir>/<tre>/``. Defaults to
+          ``Path.cwd() / "output"``.
 
         Returns
         -------
-        A dict mapping each result object path to its parsed content
-        (JSON / CSV decoded where possible, raw string otherwise).
+        Dict mapping each TRE name to the list of
+        :class:`~pathlib.Path` objects for its downloaded files.
         """
         resolved_id = task_id or self._last_task_id
         if resolved_id is None:
             raise ValueError(
                 "No Submission task ID available. Either call submit() first or pass "
-                "a task_id explicitly to fetch_results()."
+                "a task_id explicitly to fetch_all_results()."
             )
 
-        results: dict[str, dict[str, Any]] = {}
+        base_dir = (
+            Path(output_dir) if output_dir is not None else Path.cwd() / "output"
+        )
 
-        #  init Minio client on demand
+        results: dict[str, list[Path]] = {}
+
         minio_client = MinioClientBuilder(
             config=self._validator.config,
             auth=self._validator.auth,
@@ -190,6 +214,8 @@ class Workbench:
             check_status_message = check_child_task_status(child_task_info)
             if check_status_message is not None:
                 raise ValueError(check_status_message)
-            results[tre] = minio_client.fetch_result(child_task_info.id, bucket=bucket)
+            results[tre] = minio_client.download_results(
+                child_task_info.id, base_dir / tre, bucket=bucket
+            )
 
         return results

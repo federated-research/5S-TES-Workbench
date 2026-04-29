@@ -1,8 +1,14 @@
 """Builder responsible for fetching task results from MinIO after submission."""
 
+from pathlib import Path
 from typing import Any
 from minio import Minio
-from ..helpers.minio import list_results, get_and_parse_result, exchange_minio_token
+from ..helpers.minio import (
+    list_results,
+    get_and_parse_result,
+    download_result,
+    exchange_minio_token,
+)
 from ..helpers.auth import resolve_bearer
 from ..helpers.url import is_https
 from ..schema.config_schema import ConfigValidationModel
@@ -82,3 +88,39 @@ class MinioClientBuilder:
             )
 
         return results
+
+    def download_results(
+        self,
+        task_id: str,
+        output_dir: Path,
+        bucket: str | None = None,
+    ) -> list[Path]:
+        """
+        Download all output objects for a task to a local directory.
+
+        Each object is written to ``output_dir/<filename>``, stripping the
+        leading ``<task_id>/`` prefix that MinIO uses as a folder separator.
+
+        Parameters
+        ----------
+        - task_id: ID returned by the TES submission.
+        - output_dir: Local directory to write the downloaded files into.
+          The directory (and any missing parents) is created automatically.
+        - bucket: Override the bucket from config.
+
+        Returns
+        -------
+        List of :class:`~pathlib.Path` objects pointing to every downloaded
+        file.
+        """
+        object_paths = list_results(self._client, self._config, task_id, bucket=bucket)
+
+        downloaded: list[Path] = []
+        for path in object_paths:
+            logger.info("Downloading result object: %s", path)
+            local_path = download_result(
+                self._client, self._config, path, output_dir, bucket=bucket
+            )
+            downloaded.append(local_path)
+
+        return downloaded

@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 import json
+from pathlib import Path
 from typing import Any
 from io import StringIO
 from minio import Minio
@@ -130,6 +131,53 @@ def get_and_parse_result(
             logger.warning("Object not found: %s", object_path)
             return None
         raise
+
+
+def download_result(
+    client: Minio,
+    config: ConfigValidationModel,
+    object_path: str,
+    output_dir: Path,
+    bucket: str | None = None,
+) -> Path:
+    """
+    Download a single result object from MinIO to a local file.
+
+    The ``<task_id>/`` prefix is stripped from ``object_path`` so that
+    only the filename (and any sub-path) is preserved under ``output_dir``.
+
+    Parameters
+    ----------
+    - client: Authenticated MinIO client.
+    - config: Validated infrastructure configuration.
+    - object_path: Full object path within the bucket (e.g.
+        ``"<task_id>/output.csv"``).
+    - output_dir: Local directory to write the file into.
+    - bucket: Override the bucket from config.
+
+    Returns
+    -------
+    The :class:`~pathlib.Path` of the downloaded local file.
+    """
+    resolved_bucket = bucket or config.minio_output_bucket
+
+    # Strip the leading <task_id>/ prefix so the filename is clean.
+    parts = object_path.split("/", 1)
+    relative_name = parts[1] if len(parts) > 1 else object_path
+
+    local_path = output_dir / relative_name
+    local_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        client.fget_object(resolved_bucket, object_path, str(local_path))
+        logger.info("Downloaded %s -> %s", object_path, local_path)
+    except minio.error.S3Error as e:
+        if e.code == "NoSuchKey":
+            logger.warning("Object not found, skipping: %s", object_path)
+            raise
+        raise
+
+    return local_path
 
 
 def _parse_sts_response(response: requests.Response) -> MinioCredentials:
