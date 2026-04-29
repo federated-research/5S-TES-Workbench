@@ -23,23 +23,6 @@ class ChildTaskInfo:
     status: TaskStatus
 
 
-def require_client(client: Minio | None) -> Minio:
-    if client is None:
-        raise ValueError(
-            "MinIO client is not initialised. "
-            "Please call fetch_results() after submit()."
-        )
-    return client
-
-
-def require_config(config: ConfigValidationModel | None) -> ConfigValidationModel:
-    if config is None:
-        raise ValueError(
-            "MinIO builder has no config. Please call fetch_results() after submit()."
-        )
-    return config
-
-
 def is_https(url: str) -> bool:
     parsed = urlparse(url)
     if parsed.scheme == "https":
@@ -107,8 +90,8 @@ def check_child_task_status(child_task_info: ChildTaskInfo) -> str | None:
 
 
 def list_results(
-    client: Minio | None,
-    config: ConfigValidationModel | None,
+    client: Minio,
+    config: ConfigValidationModel,
     task_id: str,
     bucket: str | None = None,
 ) -> list[str]:
@@ -123,13 +106,15 @@ def list_results(
     - task_id: ID returned by the TES submission.
     - bucket: Override the bucket from config. Defaults to
         ``config.minio_output_bucket``.
+    - client: MinIO client (should be already initialised before calling this function).
+    - config: ConfigValidationModel (should be already validated before calling this function).
 
     Returns
     -------
     List of object names found under the task prefix.
     """
-    client = require_client(client)
-    resolved_bucket = bucket or require_config(config).minio_output_bucket
+
+    resolved_bucket = bucket or config.minio_output_bucket
     prefix = f"{task_id}/"
 
     try:
@@ -143,8 +128,8 @@ def list_results(
 
 
 def get_and_parse_result(
-    client: Minio | None,
-    config: ConfigValidationModel | None,
+    client: Minio,
+    config: ConfigValidationModel,
     object_path: str,
     bucket: str | None = None,
 ) -> str | dict[str, Any] | list[Any] | None:
@@ -159,14 +144,16 @@ def get_and_parse_result(
     - object_path: Full object path within the bucket (e.g.
         ``"<task_id>/stdout"``)
     - bucket: Override the bucket from config.
+    - client: MinIO client (should be already initialised before calling this function).
+    - config: ConfigValidationModel (should be already validated before calling this function).
 
     Returns
     -------
     String content of the object, or ``None`` if the object does not
     exist.
     """
-    client = require_client(client)
-    resolved_bucket = bucket or require_config(config).minio_output_bucket
+
+    resolved_bucket = bucket or config.minio_output_bucket
 
     try:
         response = client.get_object(resolved_bucket, object_path)
