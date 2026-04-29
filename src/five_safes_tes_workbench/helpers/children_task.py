@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from urllib.parse import urljoin
 import requests
 from ..schema.config_schema import ConfigValidationModel
 from ..utils.logger import get_logger
@@ -28,22 +29,22 @@ def get_child_task_info(
     """
     Get the child task ID for a given task and TRE.
     """
+    child_info_url = urljoin(
+        config.tes_base_url,
+        f"api/Submission/GetChildSubmissionInfoByParentAndTre?parentSubmissionId={parent_task_id}&treName={tre}",
+    )
     response = requests.get(
-        f"{config.tes_base_url.rstrip('/')}/api/Submission/GetChildSubmissionInfoByParentAndTre?parentSubmissionId={parent_task_id}&treName={tre}"
+        child_info_url,
     )
     response.raise_for_status()
-    if response.status_code != 200:
-        raise RuntimeError(
-            f"Failed to get child task ID: {response.status_code} {response.text}"
-        )
 
     child_task_info = response.json()
     if child_task_info is None:
         raise RuntimeError(
-            f"No child task ID found for parent task {parent_task_id} and TRE {tre}"
+            f"No child task info found for parent task {parent_task_id} and TRE {tre}"
         )
     logger.info(
-        "Child task ID: %s, status: %s",
+        "Child task info: %s, status: %s",
         child_task_info["id"],
         TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info["status"])],
     )
