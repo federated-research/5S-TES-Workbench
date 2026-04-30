@@ -2,46 +2,63 @@ from datetime import datetime, timezone
 
 import tes  # type: ignore
 
+from ...common.exceptions.tes_error import TESBuildError
 from ...common.params.tes_builder_params import TESTaskParams
+from ...core.tes.base_registry import BaseTemplateRegistry
+from ...core.tes.registry import create_default_registry
 from ...schema.config_schema import ConfigValidationModel
 from ...utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# ----- Defaults ------
 
-_DEFAULT_NAME = "Hello World"
-_DEFAULT_DESCRIPTION = "Hello World"
-_DEFAULT_OUTPUT_URL = "s3://"
-_DEFAULT_OUTPUT_PATH = "/outputs"
-
-
-class WorkbenchTESBuilder():
+class WorkbenchTESBuilder:
     """
-    Builder class responsible for constructing TES tasks
-    based on the validated configuration and
-    provided TES task parameters.
+    Builder class responsible for constructing TES tasks.
+
+    Supports two modes:
+        1. Template-based: build_from_template() — uses registered
+           templates with optional overrides.
+        2. Custom: build() — fully user-defined parameters.
+
+    Attributes:
+        _tes_task: The constructed TES task.
+        _registry: Template registry for preset tasks.
     """
 
-    def __init__(self) -> None:
-        """
-        Initializes the WorkbenchTESBuilder with a
-        placeholder for the TES task that will
-        be built during the build process.
-        """
+    def __init__(
+        self,
+        registry: BaseTemplateRegistry | None = None,
+    ) -> None:
         self._tes_task: tes.Task | None = None
+        self._registry = registry or create_default_registry()
 
     @property
     def tes_task(self) -> tes.Task:
-        """
-        Returns the built TES task.
-        """
         if self._tes_task is None:
-            raise ValueError(
-                "Before submitting the TES message, \
-                    please call the function build_tes()."
+            raise TESBuildError(
+                "No TES task has been built. "
+                "Call build_tes.hello_world() or build_tes.custom() first."
             )
         return self._tes_task
+
+    def build_from_template(
+        self,
+        config: ConfigValidationModel,
+        template_name: str,
+        overrides: dict[str, object] | None = None,
+    ) -> None:
+        """
+        Builds a TES task from a registered template.
+        Registry handles lookup and parameter merging.
+
+        Args:
+            config: Validated infrastructure configuration.
+            template_name: Name of the template.
+            overrides: Optional params to override template defaults.
+        """
+        params = self._registry.resolve(template_name, overrides)
+        self.build(config, params)
 
     def build(
         self,
@@ -49,50 +66,40 @@ class WorkbenchTESBuilder():
         params: TESTaskParams,
     ) -> None:
         """
-        Builds the TES task based on the provided configuration
-        and TES task parameters.
+        Builds a TES task from provided parameters.
+        All values must come from template or user params.
 
-        Parameters
-        ----------
-        - config: Validated configuration containing TES endpoint
-          and other settings.
-
-        - params: Parameters for building the TES task. TESTaskParams
-        holds the expected params for both config
-        and tes message.
+        Args:
+            config: Validated infrastructure configuration.
+            params: TES task parameters.
         """
 
-        name = params.get("name", _DEFAULT_NAME)
-        description = params.get("description", _DEFAULT_DESCRIPTION)
         image = params["image"]
         command = params["command"]
-        output_url = params.get("output_url", _DEFAULT_OUTPUT_URL)
-        output_path = params.get("output_path", _DEFAULT_OUTPUT_PATH)
-
-        _inputs: list[tes.Input] = []
-        _outputs = [
-            tes.Output(
-                name="Stdout",
-                description="Stdout results",
-                url=output_url,
-                path=output_path,
-                type="DIRECTORY",
-            )
-        ]
-        _executors = [tes.Executor(image=image, command=command)]
-        _tags = {
-            "project": config.project,
-            "tres": ",".join(config.tres),
-        }
+        name = params["name"]
+        description = params["description"]
+        output_url = params["output_url"]
+        output_path = params["output_path"]
 
         self._tes_task = tes.Task(
             name=name,
             description=description,
-            inputs=_inputs,
-            outputs=_outputs,
-            executors=_executors,
+            inputs=[],
+            outputs=[
+                tes.Output(
+                    name="Stdout",
+                    description="Stdout results",
+                    url=output_url,
+                    path=output_path,
+                    type="DIRECTORY",
+                )
+            ],
+            executors=[tes.Executor(image=image, command=command)],
             volumes=None,
-            tags=_tags,
+            tags={
+                "project": config.project,
+                "tres": ",".join(config.tres),
+            },
             logs=None,
             creation_time=datetime.now(timezone.utc),
         )
