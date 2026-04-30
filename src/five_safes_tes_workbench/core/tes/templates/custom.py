@@ -41,13 +41,15 @@ class CustomTemplate(BaseTESTemplate[CustomUserParams]):
                 "name, image, and command are required."
             )
 
+        # ---- Defaults for optional fields ----
+        _OUTPUT_URL = overrides.get("output_url", "s3://output")
+        _OUTPUT_PATH = overrides.get("output_path", "/outputs")
+        _DESCRIPTION = overrides.get("description", "Custom TES Task")
+
         # ---- Pull caller-provided values ----
         _NAME = overrides["name"]
         _IMAGE = overrides["image"]
         _COMMAND = overrides["command"]
-        _OUTPUT_URL = overrides["output_url"]
-        _OUTPUT_PATH = overrides["output_path"]
-        _DESCRIPTION = overrides.get("description", "")
 
         return TESTaskParams(
             name=_NAME,
