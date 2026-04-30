@@ -1,4 +1,5 @@
 from typing import Annotated
+from ..common.validator_enums import ConfigKey
 
 from pydantic import (
     AnyHttpUrl,
@@ -34,13 +35,17 @@ class ConfigValidationModel(BaseModel):
     project: str
     tes_base_url: HttpUrlString
     minio_sts_endpoint: HttpUrlString
-    minio_endpoint: str
+    minio_endpoint: HttpUrlString
     minio_output_bucket: str
     tres: list[str]
 
     @field_validator(
-        *[e.value for e in ConfigParamEnums if e != ConfigParamEnums.TRES],
-        mode="before",
+        ConfigKey.PROJECT.value,
+        ConfigKey.TES_BASE_URL.value,
+        ConfigKey.MINIO_STS_ENDPOINT.value,
+        ConfigKey.MINIO_ENDPOINT.value,
+        ConfigKey.MINIO_OUTPUT_BUCKET.value,
+        mode="before"
     )
     @classmethod
     def check_not_empty(cls, v: str, info: ValidationInfo) -> str:
@@ -57,7 +62,7 @@ class ConfigValidationModel(BaseModel):
         cleaned = [item.strip() for item in v]
         for i, item in enumerate(cleaned):
             if not item:
-                raise ConfigValidationError(
-                    [f"'tres' contains an empty value at index {i}."]
+                raise ValueError(
+                    f"'tres' contains an empty value at index {i}"
                 )
         return cleaned

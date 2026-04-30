@@ -1,4 +1,12 @@
 import requests
+
+from ..helpers.auth import fetch_keycloak_token, resolve_bearer
+from ..utils.logger import get_logger
+
+from ..schema.config_schema import ConfigValidationModel
+from ..schema.auth_schema import AuthValidationModel
+from ..common.validator_enums import AuthMode
+
 import tes  # type: ignore
 
 from ...common.enums.validator_enums import AuthMode
@@ -45,7 +53,9 @@ class WorkbenchSubmit():
 
         try:
 
-            _task_json: str = task.as_json()  # type: ignore[reportUnknownMemberType]
+        base_url = config.tes_base_url.rstrip("/")
+        endpoint = f"{base_url}/v1/tasks"
+        bearer = resolve_bearer(auth)
 
             base_url = config.tes_base_url.rstrip("/")
             endpoint = f"{base_url}/v1/tasks"
@@ -53,6 +63,9 @@ class WorkbenchSubmit():
 
             logger.info("Submitting task to %s/v1/tasks", base_url)
 
+        if response.status_code == 401 and auth.auth_mode == AuthMode.CREDENTIALS:
+            logger.info("Received 401, retrying with fresh keycloak token...")
+            bearer = fetch_keycloak_token(auth)
             response = self._post_task(endpoint, _task_json, bearer)
 
             if response.status_code == 401 and auth.auth_mode == AuthMode.CREDENTIALS:
@@ -97,67 +110,3 @@ class WorkbenchSubmit():
             },
             timeout=60,
         )
-
-    @staticmethod
-    def _resolve_bearer(auth: AuthValidationModel) -> str:
-        """
-        Helper for resolving the bearer token based on
-        the authentication mode.
-
-        - If the mode is ACCESS_TOKEN, it uses the provided token.
-
-        - If the mode is CREDENTIALS, it fetches a new token from Keycloak.
-
-        Attributes:
-                - `auth`: The authentication details containing
-                mode and credentials.
-        """
-        if auth.auth_mode == AuthMode.ACCESS_TOKEN:
-            if auth.access_token is None:
-                raise ValueError(
-                    "access_token is required when auth_mode is ACCESS_TOKEN"
-                )
-
-            logger.info("Using provided access token")
-            return auth.access_token
-
-        logger.info("Fetching token from keycloak...")
-        return WorkbenchSubmit._fetch_keycloak_token(auth)
-
-    @staticmethod
-    def _fetch_keycloak_token(auth: AuthValidationModel) -> str:
-        """
-        Helper method to fetch a new access token from
-        Keycloak using the provided credentials.
-
-        Attributes:
-             - `auth`: The authentication details containing
-            Keycloak credentials.
-
-        Returns:
-             - The access token fetched from Keycloak.
-        """
-        url = (
-            f"{auth.keycloak_url.rstrip('/')}"  # type: ignore[union-attr]
-            f"/realms/Dare-Control/protocol/openid-connect/token"
-        )
-
-        logger.info("Requesting keycloak token from %s", url)
-
-        response = requests.post(
-            url,
-            data={
-                "client_id": auth.client_id,
-                "client_secret": auth.client_secret,
-                "username": auth.username,
-                "password": auth.password,
-                "grant_type": "password",
-            },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            timeout=30,
-        )
-
-        response.raise_for_status()
-
-        logger.info("Keycloak token fetched successfully")
-        return response.json()["access_token"]
