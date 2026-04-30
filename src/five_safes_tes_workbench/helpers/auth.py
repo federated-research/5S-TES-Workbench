@@ -1,6 +1,7 @@
 import requests
+
+from ..common.enums.validator_enums import AuthMode
 from ..schema.auth_schema import AuthValidationModel
-from ..common.validator_enums import AuthMode
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)

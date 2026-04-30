@@ -1,9 +1,10 @@
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from minio import Minio
+
 import minio
 import requests
-import xml.etree.ElementTree as ET
+from minio import Minio
 
 from ..constants.minio import (
     STS_DURATION_SECONDS,

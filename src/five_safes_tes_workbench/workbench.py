@@ -21,11 +21,9 @@ class Workbench:
     -------
     This class holds the main methods as follows:
 
-    1. validate: Validates the configuration and authentication.
-    2. build_tes: Builds the TES task payload.
-    3. submit: Submits the TES task to the endpoint and stores the task ID.
-    4. fetch_results: Fetches task output objects from MinIO after the task
-       has completed.
+    1. validate: Validates the configuration.
+    2. build_tes: Builds the TES task.
+    3. submit: Submits the TES task to the endpoint.
     """
 
     def __init__(
@@ -35,12 +33,13 @@ class Workbench:
         submitter: WorkbenchSubmit | None = None,
     ) -> None:
         """
-        Initializes the Workbench with instances of the validate builder,
-        TES builder, submit builder, and MinIO builder.
+        Initializes the Workbench with instances of the
+        validate builder, TES builder, and submit builder.
         """
-        self._validator = WorkbenchValidateBuilder()
-        self._task_builder = WorkbenchTESBuilder()
-        self._submitter = WorkbenchSubmitBuilder()
+        self._validator = validator or WorkbenchValidateBuilder()
+        self._task_builder = task_builder or WorkbenchTESBuilder()
+        self._submitter = submitter or WorkbenchSubmit()
+        self._last_task_id: str | None = None
 
     # ----- Validation Builder -----
 
@@ -50,7 +49,8 @@ class Workbench:
         **kwargs: Unpack[ConfigValidationParams],
     ) -> "Workbench":
         """
-        Validates the configuration and authentication parameters.
+        Validates the configuration and
+        authentication parameters.
 
         Parameters
         ----------
@@ -63,10 +63,10 @@ class Workbench:
     # ----- TES Builder -----
 
     def build_tes(self, **kwargs: Unpack[TESTaskParams]) -> "Workbench":
-        """ 
-        Builds the TES message and provided TES 
+        """
+        Builds the TES message and provided TES
         task parameters.
-        
+
         Parameters
         ----------
         - kwargs: Parameters for building the TES task.
@@ -80,11 +80,10 @@ class Workbench:
     # ----- Submit Builder -----
 
     def submit(self) -> str:
-        """ 
-        Submits the built TES task to the 
-        configured TES endpoint.
         """
-        Submits the built TES task to the configured TES endpoint.
+        Submits the built TES task to the
+        configured TES endpoint.
+
 
         Returns
         -------

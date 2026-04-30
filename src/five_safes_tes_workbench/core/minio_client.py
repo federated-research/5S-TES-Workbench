@@ -1,16 +1,18 @@
 """Builder responsible for fetching task results from MinIO after submission."""
 
 from pathlib import Path
+
 from minio import Minio
+
+from ..helpers.auth import resolve_bearer
 from ..helpers.minio import (
-    list_results,
     download_result,
     exchange_minio_token,
+    list_results,
 )
-from ..helpers.auth import resolve_bearer
 from ..helpers.url import is_https, strip_scheme
-from ..schema.config_schema import ConfigValidationModel
 from ..schema.auth_schema import AuthValidationModel
+from ..schema.config_schema import ConfigValidationModel
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
