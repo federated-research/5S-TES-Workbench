@@ -35,7 +35,7 @@ class SimpleSQLTemplate(BaseTESTemplate[SimpleSQLUserParams]):
         _IMAGE = "harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0"  # noqa: E501
         _DESCRIPTION = overrides.get("description", "Simple SQL Task")
         _OUTPUT_PATH = overrides.get("output_path", "/outputs")
-        _OUTPUT_URL = overrides.get("output_url", "s3://simple-sql-output")
+        _OUTPUT_URL = overrides.get("output_url", "s3://")
         _COMMAND = [
             f"--Output={_OUTPUT_PATH}/output.csv",
             f"--Query={overrides['query']}",
