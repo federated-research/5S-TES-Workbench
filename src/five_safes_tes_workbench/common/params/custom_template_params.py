@@ -17,5 +17,5 @@ class CustomUserParams(TypedDict):
     description: NotRequired[str]
     image: Required[str]
     command: Required[list[str]]
-    output_url: Required[str]
+    output_url: NotRequired[str]
     output_path: Required[str]
