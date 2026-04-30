@@ -1,5 +1,9 @@
 from ....common.params.simple_sql_params import SimpleSQLUserParams
-from ....common.params.tes_builder_params import TESTaskParams
+from ....common.params.tes_builder_params import (
+    ExecutorTESParams,
+    OutputTESParams,
+    TESTaskParams,
+)
 from ...base.tes_template_abc import BaseTESTemplate
 
 
@@ -28,25 +32,29 @@ class SimpleSQLTemplate(BaseTESTemplate[SimpleSQLUserParams]):
 
         # ---- Fixed parameters for this template ----
 
-        _IMAGE = "harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0" # noqa: E501
+        _IMAGE = "harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0"  # noqa: E501
         _DESCRIPTION = overrides.get("description", "Simple SQL Task")
         _OUTPUT_PATH = overrides.get("output_path", "/outputs")
         _OUTPUT_URL = overrides.get("output_url", "s3://simple-sql-output")
-        _OUTPUT_FILE = f"{_OUTPUT_PATH}/output.csv"
+        _COMMAND = [
+            f"--Output={_OUTPUT_PATH}/output.csv",
+            f"--Query={overrides['query']}",
+        ]
 
         return TESTaskParams(
-            # --- Required params from user ---
             name=overrides["name"],
-
-            # --- Fixed by this template ---
-            description=_DESCRIPTION,
-            image=_IMAGE,
-            command=[
-                f"--Output={_OUTPUT_FILE}",
-                f"--Query={overrides['query']}",
+            executors=[
+                ExecutorTESParams(executor_image=_IMAGE, executor_command=_COMMAND)
             ],
-
-            # --- Optional params with template defaults ---
-            output_url=_OUTPUT_URL,
-            output_path=_OUTPUT_PATH,
+            description=_DESCRIPTION,
+            inputs=[],
+            outputs=[
+                OutputTESParams(
+                    output_name="Stdout",
+                    output_description="Stdout results",
+                    output_url=_OUTPUT_URL,
+                    output_path=_OUTPUT_PATH,
+                )
+            ],
+            volumes=[],
         )
