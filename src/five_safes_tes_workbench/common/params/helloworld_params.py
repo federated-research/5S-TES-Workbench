@@ -1,4 +1,4 @@
-from typing import NotRequired, Required, TypedDict
+from typing import NotRequired, TypedDict
 
 
 class HelloWorldUserParams(TypedDict):
@@ -16,9 +16,9 @@ class HelloWorldUserParams(TypedDict):
         - output_path: "/outputs"
     """
 
-    image: Required[str]
-    command: Required[list[str]]
-    name: Required[str]
+    image: NotRequired[str]
+    command: NotRequired[list[str]]
+    name: NotRequired[str]
     description: NotRequired[str]
     output_url: NotRequired[str]
     output_path: NotRequired[str]

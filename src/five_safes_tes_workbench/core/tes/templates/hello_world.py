@@ -25,17 +25,18 @@ class HelloWorldTemplate(BaseTESTemplate[HelloWorldUserParams]):
 
         # ---- Fixed parameters for this template ----
 
+        _NAME = overrides.get("name", "Hello World Task")
+        _IMAGE = overrides.get("image", "alpine:latest")
+        _COMMAND = overrides.get("command", ["echo", "hello world"])
         _DESCRIPTION = overrides.get("description", "Hello World")
         _OUTPUT_URL = overrides.get("output_url", "s3://hello-world-output")
         _OUTPUT_PATH = overrides.get("output_path", "/outputs")
 
         return TESTaskParams(
-            # --- Required params from user ---
-            name=overrides["name"],
-            image=overrides["image"],
-            command=overrides["command"],
 
-            # --- Optional params with template defaults ---
+            name=_NAME,
+            image=_IMAGE,
+            command=_COMMAND,
             description=_DESCRIPTION,
             output_url=_OUTPUT_URL,
             output_path=_OUTPUT_PATH,
