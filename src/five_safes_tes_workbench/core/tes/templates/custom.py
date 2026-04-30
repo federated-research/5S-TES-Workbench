@@ -33,7 +33,7 @@ class CustomTemplate(BaseTESTemplate[CustomUserParams]):
         """
 
         # ---- Validate required user inputs ----
-        required_fields = ("name", "image", "command", "output_url", "output_path")
+        required_fields = ("name", "image", "command")
         missing = [field for field in required_fields if field not in overrides]
         if missing:
             raise TESBuildError(
