@@ -1,6 +1,6 @@
 [project]
 name = "five-safes-tes-workbench"
-version = "0.1.0"
+version = "0.1.1"
 description = "Common feature library for working with 5S-TES"
 readme = "README.md"
 authors = [
@@ -25,5 +25,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "mypy>=1.20.1",
+    "pytest>=8.0.0",
+    "pytest-mock>=3.14.0",
     "types-pyyaml>=6.0.12.20260408",
 ]
