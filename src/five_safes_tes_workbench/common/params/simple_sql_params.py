@@ -7,7 +7,6 @@ class SimpleSQLUserParams(TypedDict):
 
     Required (must be provided by the caller):
         - name: Task name.
-        - description: Task description.
         - query: SQL query to execute.
 
     Internal (fixed by the template, not user-configurable):
