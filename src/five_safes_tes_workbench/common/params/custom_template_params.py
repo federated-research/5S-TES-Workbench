@@ -4,7 +4,6 @@ from typing import Required, TypedDict
 class CustomUserParams(TypedDict):
     """
     User-facing parameters for the Custom template.
-    All fields are required — no defaults are provided.
 
     - name: Task name.
     - description: Task description.
