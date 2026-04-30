@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Unpack
 
-from .common.params.tes_builder_params import TESTaskParams
 from .common.params.validate_params import ConfigValidationParams
 from .core.builders.submit_builder import WorkbenchSubmit
 from .core.builders.tes_builder import WorkbenchTESBuilder
@@ -11,6 +10,7 @@ from .helpers.children_task import (
     get_child_task_info,
     validate_child_task_status,
 )
+from .services.tes_builder_service import TESBuilderService
 
 
 class Workbench:
@@ -62,20 +62,21 @@ class Workbench:
 
     # ----- TES Builder -----
 
-    def build_tes(self, **kwargs: Unpack[TESTaskParams]) -> "Workbench":
+    @property
+    def build_tes(self) -> TESBuilderService:
         """
-        Builds the TES message and provided TES
-        task parameters.
+        Provides access to TES building methods.
 
-        Parameters
-        ----------
-        - kwargs: Parameters for building the TES task.
+        It uses dynamic attribute access to allow template-based
+        building via method calls (e.g., `build_tes.hello_world()`)
+        and a custom build method for fully user-defined tasks.
+
+        Returns
+        -------
+        TESBuilderService: An instance that provides methods
+        to build TES tasks.
         """
-        self._task_builder.build(
-            self._validator.config,
-            kwargs,
-        )
-        return self
+        return TESBuilderService(self._validator, self._task_builder)
 
     # ----- Submit Builder -----
 
