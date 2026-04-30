@@ -10,9 +10,9 @@ from ...utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-class WorkbenchSubmitBuilder():
+class WorkbenchSubmit():
     """
-    Builder class responsible for submitting TES tasks
+    Class responsible for submitting TES tasks
     to the Submission API.
 
     It takes the validated configuration, constructed test
@@ -122,7 +122,7 @@ class WorkbenchSubmitBuilder():
             return auth.access_token
 
         logger.info("Fetching token from keycloak...")
-        return WorkbenchSubmitBuilder._fetch_keycloak_token(auth)
+        return WorkbenchSubmit._fetch_keycloak_token(auth)
 
     @staticmethod
     def _fetch_keycloak_token(auth: AuthValidationModel) -> str:

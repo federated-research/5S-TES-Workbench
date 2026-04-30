@@ -2,7 +2,7 @@ from typing import Unpack
 
 from .common.params.tes_builder_params import TESTaskParams
 from .common.params.validate_params import ConfigValidationParams
-from .core.builders.submit_builder import WorkbenchSubmitBuilder
+from .core.builders.submit_builder import WorkbenchSubmit
 from .core.builders.tes_builder import WorkbenchTESBuilder
 from .core.builders.validate_builder import WorkbenchValidateBuilder
 
@@ -24,7 +24,7 @@ class Workbench:
         self,
         validator: WorkbenchValidateBuilder | None = None,
         task_builder: WorkbenchTESBuilder | None = None,
-        submitter: WorkbenchSubmitBuilder | None = None,
+        submitter: WorkbenchSubmit | None = None,
     ) -> None:
         """
         Initializes the Workbench with instances of the
@@ -32,7 +32,7 @@ class Workbench:
         """
         self._validator = validator or WorkbenchValidateBuilder()
         self._task_builder = task_builder or WorkbenchTESBuilder()
-        self._submitter = submitter or WorkbenchSubmitBuilder()
+        self._submitter = submitter or WorkbenchSubmit()
 
     # ----- Validation Builder -----
 
