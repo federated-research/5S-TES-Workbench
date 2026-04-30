@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from urllib.parse import urljoin
+
 import requests
+
+from ..constants.task_status import TASK_STATUS_DESCRIPTIONS, TaskStatus
 from ..schema.config_schema import ConfigValidationModel
 from ..utils.logger import get_logger
-from ..constants.task_status import TASK_STATUS_DESCRIPTIONS, TaskStatus
 
 logger = get_logger(__name__)
 

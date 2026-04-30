@@ -1,9 +1,10 @@
+from datetime import datetime, timezone
+
 import tes  # type: ignore
 
-from ..schema.config_schema import ConfigValidationModel
-from ..utils.logger import get_logger
-from ..common.tes_builder_params import TESTaskParams
-from datetime import datetime, timezone
+from ...common.params.tes_builder_params import TESTaskParams
+from ...schema.config_schema import ConfigValidationModel
+from ...utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -14,16 +15,17 @@ _DEFAULT_DESCRIPTION = "Hello World"
 _DEFAULT_OUTPUT_URL = "s3://"
 _DEFAULT_OUTPUT_PATH = "/outputs"
 
-class WorkbenchTESBuilder:
+
+class WorkbenchTESBuilder():
     """
     Builder class responsible for constructing TES tasks
-    based on the validated configuration and 
+    based on the validated configuration and
     provided TES task parameters.
     """
 
     def __init__(self) -> None:
         """
-        Initializes the WorkbenchTESBuilder with a 
+        Initializes the WorkbenchTESBuilder with a
         placeholder for the TES task that will
         be built during the build process.
         """
@@ -35,7 +37,10 @@ class WorkbenchTESBuilder:
         Returns the built TES task.
         """
         if self._tes_task is None:
-            raise ValueError("Before submitting the TES message, please call the function build_tes().")
+            raise ValueError(
+                "Before submitting the TES message, \
+                    please call the function build_tes()."
+            )
         return self._tes_task
 
     def build(
@@ -46,12 +51,12 @@ class WorkbenchTESBuilder:
         """
         Builds the TES task based on the provided configuration
         and TES task parameters.
-        
+
         Parameters
         ----------
         - config: Validated configuration containing TES endpoint
           and other settings.
-          
+
         - params: Parameters for building the TES task. TESTaskParams
         holds the expected params for both config
         and tes message.
@@ -64,25 +69,30 @@ class WorkbenchTESBuilder:
         output_url = params.get("output_url", _DEFAULT_OUTPUT_URL)
         output_path = params.get("output_path", _DEFAULT_OUTPUT_PATH)
 
+        _inputs: list[tes.Input] = []
+        _outputs = [
+            tes.Output(
+                name="Stdout",
+                description="Stdout results",
+                url=output_url,
+                path=output_path,
+                type="DIRECTORY",
+            )
+        ]
+        _executors = [tes.Executor(image=image, command=command)]
+        _tags = {
+            "project": config.project,
+            "tres": ",".join(config.tres),
+        }
+
         self._tes_task = tes.Task(
             name=name,
             description=description,
-            inputs=[],
-            outputs=[
-                tes.Output(
-                    name="Stdout",
-                    description="Stdout results",
-                    url=output_url,
-                    path=output_path,
-                    type="DIRECTORY",
-                )
-            ],
-            executors=[tes.Executor(image=image, command=command)],
+            inputs=_inputs,
+            outputs=_outputs,
+            executors=_executors,
             volumes=None,
-            tags={
-                "project": config.project,
-                "tres": ",".join(config.tres),
-            },
+            tags=_tags,
             logs=None,
             creation_time=datetime.now(timezone.utc),
         )

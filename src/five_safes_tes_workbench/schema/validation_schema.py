@@ -1,8 +1,10 @@
-import yaml
 from pathlib import Path
+
+import yaml
 from pydantic import BaseModel
-from .config_schema import ConfigValidationModel
+
 from .auth_schema import AuthValidationModel
+from .config_schema import ConfigValidationModel
 
 
 class WorkbenchValidationModel(BaseModel):

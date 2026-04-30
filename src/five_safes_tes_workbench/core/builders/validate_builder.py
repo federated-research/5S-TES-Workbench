@@ -1,26 +1,28 @@
 from typing import Unpack
 
-from ..schema.validation_schema import WorkbenchValidationModel
-from ..schema.config_schema import ConfigValidationModel
-from ..schema.auth_schema import AuthValidationModel
-from ..common.validate_params import ConfigValidationParams, split_config_params
-from ..common.validator_enums import AuthMode
-from ..utils.logger import get_logger
+from ...common.enums.validator_enums import AuthMode
+from ...common.exceptions.auth_errors import AuthValidationError
+from ...common.exceptions.config_errors import ConfigValidationError
+from ...common.params.validate_params import ConfigValidationParams, split_config_params
+from ...schema.auth_schema import AuthValidationModel
+from ...schema.config_schema import ConfigValidationModel
+from ...schema.validation_schema import WorkbenchValidationModel
+from ...utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-class WorkbenchValidateBuilder:
+class WorkbenchValidateBuilder():
     """
-    Builder class responsible for validating configuration 
+    Builder class responsible for validating configuration
     and authentication parameters for the TES workbench.
     """
 
     def __init__(self) -> None:
         """
-        Initializes the WorkbenchValidateBuilder 
+        Initializes the WorkbenchValidateBuilder
         with placeholders for config and auth
-        parameters that will be populated 
+        parameters that will be populated
         during validation.
 
         Attributes:
@@ -37,8 +39,12 @@ class WorkbenchValidateBuilder:
         Returns the validated infrastructure configuration.
         """
         if self._config is None:
-            raise ValueError("Before building the TES message or fetching results, please call the function validate().")
+            raise ConfigValidationError([
+                "No config information found. "
+                "Please call validate() before building the TES message."
+            ])
         return self._config
+
 
     @property
     def auth(self) -> AuthValidationModel:
@@ -46,7 +52,10 @@ class WorkbenchValidateBuilder:
         Returns the validated authentication configuration.
         """
         if self._auth is None:
-            raise ValueError("Before submitting the TES message, please call the function validate().")
+            raise AuthValidationError([
+                "No auth information found. "
+                "Please call validate() before submitting the TES message."
+            ])
         return self._auth
 
     def validate(
@@ -55,36 +64,35 @@ class WorkbenchValidateBuilder:
         **kwargs: Unpack[ConfigValidationParams],
     ) -> None:
         """
-        Validates the configuration and authentication 
+        Validates the configuration and authentication
         parameters for the TES workbench.
-        
+
         This method supports two modes of input:
         1. YAML File Input: Provide a path to a YAML file
            containing the configuration and authentication details.
-        
+
         2. Direct Parameter Input: Provide the configuration and
            authentication details directly as keyword arguments.
-           
+
         Attributes:
         -----------
         - config_path: Optional path to a YAML configuration file.
-        
-        - kwargs: Keyword arguments for direct parameter input. The 
+
+        - kwargs: Keyword arguments for direct parameter input. The
         ConfigValidationParams holds the expected params for both
         config and auth validation.
         """
 
         if config_path is not None:
             model = WorkbenchValidationModel.from_yaml(config_path)
-        elif kwargs:
-            config, auth = split_config_params(kwargs)  # type: ignore[arg-type]
-            model = WorkbenchValidationModel.model_validate({
-                "config": config,
-                "auth": auth,
-            })
+
         else:
-            raise ValueError(
-                "Must provide either 'config_path' or keyword arguments."
+            config, auth = split_config_params(kwargs)  # type: ignore[arg-type]
+            model = WorkbenchValidationModel.model_validate(
+                {
+                    "config": config,
+                    "auth": auth,
+                }
             )
 
         self._config = model.config

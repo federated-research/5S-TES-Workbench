@@ -1,9 +1,11 @@
-from typing import TypedDict, Required
+from typing import Required, TypedDict
+
+from ..enums.validator_enums import AuthParamEnums, ConfigParamEnums
 
 
 class ConfigValidationParams(TypedDict, total=False):
     """
-    TypedDict for validation parameters to 
+    TypedDict for validation parameters to
     be passed as keyword arguments to
     `Workbench.validate()`.
 
@@ -14,6 +16,7 @@ class ConfigValidationParams(TypedDict, total=False):
         2. Auth parameters: Optional parameters
            for authentication.
     """
+
     # --- Config parameters ---
 
     project: Required[str]
@@ -33,7 +36,9 @@ class ConfigValidationParams(TypedDict, total=False):
     password: str
 
 
-def split_config_params(params: ConfigValidationParams) -> tuple[dict[str, object], dict[str, object]]:
+def split_config_params(
+    params: ConfigValidationParams,
+) -> tuple[dict[str, object], dict[str, object]]:
     """Splits the input parameters into config and auth
     parameters based on predefined keys.
 
@@ -50,12 +55,6 @@ def split_config_params(params: ConfigValidationParams) -> tuple[dict[str, objec
     auth = {k: v for k, v in params.items() if k in _AUTH_KEYS}
     return config, auth
 
-_CONFIG_KEYS = {
-    "project", "tes_base_url", "minio_sts_endpoint",
-    "minio_endpoint", "minio_output_bucket", "tres",
-}
 
-_AUTH_KEYS = {
-    "access_token", "client_id", "client_secret",
-    "keycloak_url", "username", "password",
-}
+_CONFIG_KEYS = {e.value for e in ConfigParamEnums}
+_AUTH_KEYS = {e.value for e in AuthParamEnums}
