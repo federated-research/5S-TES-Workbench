@@ -12,7 +12,7 @@ class SimpleSQLUserParams(TypedDict):
     Internal (fixed by the template, not user-configurable):
         - image: Custom 5STES SQL Analysis Tool image
         from Harbor.
-        - output_url: "s3://simple-sql-output"
+        - output_url: "s3://"
         - output_path: "/outputs"
     """
 
