@@ -1,4 +1,4 @@
-from typing import Required, TypedDict
+from typing import NotRequired, Required, TypedDict
 
 
 class CustomUserParams(TypedDict):
@@ -14,8 +14,8 @@ class CustomUserParams(TypedDict):
     """
 
     name: Required[str]
-    description: NotRequired[str]
     image: Required[str]
     command: Required[list[str]]
     output_url: NotRequired[str]
     output_path: NotRequired[str]
+    description: NotRequired[str]
