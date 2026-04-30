@@ -38,7 +38,7 @@ class CustomTemplate(BaseTESTemplate[CustomUserParams]):
         if missing:
             raise TESBuildError(
                 f"Custom template missing required fields: {missing}. "
-                "All of name, image, command, output_url, output_path are required."
+                "name, image, and command are required."
             )
 
         # ---- Pull caller-provided values ----
