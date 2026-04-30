@@ -29,6 +29,7 @@ class SimpleSQLTemplate(BaseTESTemplate[SimpleSQLUserParams]):
         # ---- Fixed parameters for this template ----
 
         _IMAGE = "harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0" # noqa: E501
+        _DESCRIPTION = overrides.get("description", "Simple SQL Task")
         _OUTPUT_PATH = overrides.get("output_path", "/outputs")
         _OUTPUT_URL = overrides.get("output_url", "s3://simple-sql-output")
         _OUTPUT_FILE = f"{_OUTPUT_PATH}/output.csv"
@@ -36,9 +37,9 @@ class SimpleSQLTemplate(BaseTESTemplate[SimpleSQLUserParams]):
         return TESTaskParams(
             # --- Required params from user ---
             name=overrides["name"],
-            description=overrides["description"],
 
             # --- Fixed by this template ---
+            description=_DESCRIPTION,
             image=_IMAGE,
             command=[
                 f"--Output={_OUTPUT_FILE}",

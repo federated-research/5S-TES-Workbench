@@ -18,7 +18,7 @@ class SimpleSQLUserParams(TypedDict):
     """
 
     name: Required[str]
-    description: Required[str]
     query: Required[str]
+    description: NotRequired[str]
     output_url: NotRequired[str]
     output_path: NotRequired[str]
