@@ -15,11 +15,6 @@ VALID_KWARGS = {
     "access_token": "tok-abc123",
 }
 
-VALID_TES_PARAMS = {
-    "image": "alpine:latest",
-    "command": ["echo", "hello"],
-}
-
 
 class TestWorkbenchInit:
     def test_instantiates_without_error(self):
@@ -31,3 +26,8 @@ class TestWorkbenchInit:
         assert hasattr(wb, "_validator")
         assert hasattr(wb, "_task_builder")
         assert hasattr(wb, "_submitter")
+
+    def test_validate_returns_self_for_chaining(self):
+        wb = Workbench()
+        result = wb.validate(**VALID_KWARGS)
+        assert result is wb
