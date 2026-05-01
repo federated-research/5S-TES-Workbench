@@ -8,7 +8,7 @@ from .core.builders.validate_builder import WorkbenchValidateBuilder
 from .core.minio.minio_client import MinioClientBuilder
 from .helpers.children_task import (
     get_child_task_info,
-    validate_child_task_status,
+    is_child_task_completed,
 )
 from .services.tes_builder_service import TESBuilderService
 
@@ -151,7 +151,8 @@ class Workbench:
             )
         child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
 
-        validate_child_task_status(child_task_info)
+        if not is_child_task_completed(child_task_info):
+            return []
 
         resolved_output_dir = (
             Path(output_dir)
@@ -218,7 +219,8 @@ class Workbench:
             child_task_info = get_child_task_info(
                 self._validator.config, resolved_id, tre
             )
-            validate_child_task_status(child_task_info)
+            if not is_child_task_completed(child_task_info):
+                continue
 
             resolved_output_dir = (
                 Path(output_dir)
