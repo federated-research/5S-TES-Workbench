@@ -141,15 +141,15 @@ class WorkbenchTESBuilder:
         """
         return [
             tes.Input(
-                name=i.get("name"),
-                description=i.get("description"),
-                url=i.get("url"),
-                path=i["path"],
-                type=i.get("type", "DIRECTORY"),
-                content=i.get("content"),
-                streamable=i.get("streamable"),
+                name=input.get("name"),
+                description=input.get("description"),
+                url=input.get("url"),
+                path=input["path"],
+                type=input.get("type", "DIRECTORY"),
+                content=input.get("content"),
+                streamable=input.get("streamable"),
             )
-            for i in inputs
+            for input in inputs
         ]
 
     @staticmethod
@@ -161,12 +161,12 @@ class WorkbenchTESBuilder:
         """
         return [
             tes.Output(
-                name=o.get("name"),
-                description=o.get("description"),
-                url=o["url"],
-                path=o["path"],
-                type=o.get("type", "DIRECTORY"),
-                path_prefix=o.get("path_prefix"),
+                name=output.get("name"),
+                description=output.get("description"),
+                url=output["url"],
+                path=output["path"],
+                type=output.get("type", "DIRECTORY"),
+                path_prefix=output.get("path_prefix"),
             )
-            for o in outputs
+            for output in outputs
         ]
