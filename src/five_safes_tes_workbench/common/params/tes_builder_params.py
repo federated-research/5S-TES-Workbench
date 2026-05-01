@@ -6,7 +6,7 @@ class InputTESParams(TypedDict):
     input_description: NotRequired[str | None]
     input_url: NotRequired[str | None]
     input_path: Required[str]
-    input_type: NotRequired[str | None]
+    input_type: NotRequired[str]
     input_content: NotRequired[str | None]
     input_streamable: NotRequired[bool | None]
 
@@ -39,6 +39,6 @@ class TESTaskParams(TypedDict):
     name: Required[str]
     executors: Required[list[ExecutorTESParams]]
     description: NotRequired[str]
-    inputs: NotRequired[list[InputTESParams]]
-    outputs: NotRequired[list[OutputTESParams]]
-    volumes: NotRequired[list[str]]
+    inputs: NotRequired[list[InputTESParams] | None]
+    outputs: NotRequired[list[OutputTESParams] | None]
+    volumes: NotRequired[list[str] | None]

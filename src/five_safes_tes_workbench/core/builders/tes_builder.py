@@ -81,8 +81,8 @@ class WorkbenchTESBuilder:
 
         name = params["name"]
         executors = self._build_executors(params["executors"])
-        inputs = self._build_inputs(params.get("inputs", []))
-        outputs = self._build_outputs(params.get("outputs", []))
+        inputs = self._build_inputs(params.get("inputs", []) or [])
+        outputs = self._build_outputs(params.get("outputs", []) or [])
         description = params.get("description")
         volumes = params.get("volumes")
 
@@ -145,7 +145,7 @@ class WorkbenchTESBuilder:
                 description=i.get("input_description"),
                 url=i.get("input_url"),
                 path=i["input_path"],
-                type=i.get("input_type", "FILE"),
+                type=i.get("input_type", "DIRECTORY"),
                 content=i.get("input_content"),
                 streamable=i.get("input_streamable"),
             )
