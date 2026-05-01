@@ -36,18 +36,18 @@ class HelloWorldTemplate(BaseTESTemplate[HelloWorldUserParams]):
             description=_DESCRIPTION,
             executors=[
                 ExecutorTESParams(
-                    executor_image=_IMAGE,
-                    executor_command=_COMMAND,
-                    executor_workdir=_OUTPUT_PATH,
-                    executor_stdout=_OUTPUT_STDOUT,
+                    image=_IMAGE,
+                    command=_COMMAND,
+                    workdir=_OUTPUT_PATH,
+                    stdout=_OUTPUT_STDOUT,
                 )
             ],
             outputs=[
                 OutputTESParams(
-                    output_name="Stdout",
-                    output_description="Stdout results",
-                    output_url=_OUTPUT_URL,
-                    output_path=_OUTPUT_PATH,
+                    name="Stdout",
+                    description="Stdout results",
+                    url=_OUTPUT_URL,
+                    path=_OUTPUT_PATH,
                 )
             ],
         )

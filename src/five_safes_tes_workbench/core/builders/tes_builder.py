@@ -120,14 +120,14 @@ class WorkbenchTESBuilder:
 
         return [
             tes.Executor(
-                image=ex["executor_image"],
-                command=ex["executor_command"],
-                workdir=ex.get("executor_workdir"),
-                stdin=ex.get("executor_stdin"),
-                stdout=ex.get("executor_stdout"),
-                stderr=ex.get("executor_stderr"),
-                env=ex.get("executor_env"),
-                ignore_error=ex.get("executor_ignore_error"),
+                image=ex["image"],
+                command=ex["command"],
+                workdir=ex.get("workdir"),
+                stdin=ex.get("stdin"),
+                stdout=ex.get("stdout"),
+                stderr=ex.get("stderr"),
+                env=ex.get("env"),
+                ignore_error=ex.get("ignore_error"),
             )
             for ex in executors
         ]
@@ -141,13 +141,13 @@ class WorkbenchTESBuilder:
         """
         return [
             tes.Input(
-                name=i.get("input_name"),
-                description=i.get("input_description"),
-                url=i.get("input_url"),
-                path=i["input_path"],
-                type=i.get("input_type", "DIRECTORY"),
-                content=i.get("input_content"),
-                streamable=i.get("input_streamable"),
+                name=i.get("name"),
+                description=i.get("description"),
+                url=i.get("url"),
+                path=i["path"],
+                type=i.get("type", "DIRECTORY"),
+                content=i.get("content"),
+                streamable=i.get("streamable"),
             )
             for i in inputs
         ]
@@ -161,12 +161,12 @@ class WorkbenchTESBuilder:
         """
         return [
             tes.Output(
-                name=o.get("output_name"),
-                description=o.get("output_description"),
-                url=o["output_url"],
-                path=o["output_path"],
-                type=o.get("output_type", "DIRECTORY"),
-                path_prefix=o.get("output_path_prefix"),
+                name=o.get("name"),
+                description=o.get("description"),
+                url=o["url"],
+                path=o["path"],
+                type=o.get("type", "DIRECTORY"),
+                path_prefix=o.get("path_prefix"),
             )
             for o in outputs
         ]

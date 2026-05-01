@@ -2,33 +2,33 @@ from typing import NotRequired, Required, TypedDict
 
 
 class InputTESParams(TypedDict):
-    input_name: NotRequired[str | None]
-    input_description: NotRequired[str | None]
-    input_url: NotRequired[str | None]
-    input_path: Required[str]
-    input_type: NotRequired[str]
-    input_content: NotRequired[str | None]
-    input_streamable: NotRequired[bool | None]
+    name: NotRequired[str | None]
+    description: NotRequired[str | None]
+    url: NotRequired[str | None]
+    path: Required[str]
+    type: NotRequired[str]
+    content: NotRequired[str | None]
+    streamable: NotRequired[bool | None]
 
 
 class OutputTESParams(TypedDict):
-    output_name: NotRequired[str]
-    output_description: NotRequired[str]
-    output_type: NotRequired[str]
-    output_url: Required[str]
-    output_path: Required[str]
-    output_path_prefix: NotRequired[str | None]
+    name: NotRequired[str]
+    description: NotRequired[str]
+    type: NotRequired[str]
+    url: Required[str]
+    path: Required[str]
+    path_prefix: NotRequired[str | None]
 
 
 class ExecutorTESParams(TypedDict):
-    executor_image: Required[str]
-    executor_command: Required[list[str]]
-    executor_workdir: NotRequired[str | None]
-    executor_stdin: NotRequired[str | None]
-    executor_stdout: NotRequired[str | None]
-    executor_stderr: NotRequired[str | None]
-    executor_env: NotRequired[dict[str, str] | None]
-    executor_ignore_error: NotRequired[bool | None]
+    image: Required[str]
+    command: Required[list[str]]
+    workdir: NotRequired[str | None]
+    stdin: NotRequired[str | None]
+    stdout: NotRequired[str | None]
+    stderr: NotRequired[str | None]
+    env: NotRequired[dict[str, str] | None]
+    ignore_error: NotRequired[bool | None]
 
 
 class TESTaskParams(TypedDict):

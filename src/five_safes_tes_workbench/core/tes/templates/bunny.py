@@ -66,17 +66,17 @@ class BunnyTemplate(BaseTESTemplate[BunnyUserParams]):
             description=_DESCRIPTION,
             executors=[
                 ExecutorTESParams(
-                    executor_image=_IMAGE,
-                    executor_command=_COMMAND,
+                    image=_IMAGE,
+                    command=_COMMAND,
                 )
             ],
             outputs=[
                 OutputTESParams(
-                    output_name="Query Results",
-                    output_description="Results from the requested query execution",
-                    output_url=_OUTPUT_URL,
-                    output_path=_OUTPUT_PATH,
-                    output_type="DIRECTORY",
+                    name="Query Results",
+                    description="Results from the requested query execution",
+                    url=_OUTPUT_URL,
+                    path=_OUTPUT_PATH,
+                    type="DIRECTORY",
                 )
             ],
         )

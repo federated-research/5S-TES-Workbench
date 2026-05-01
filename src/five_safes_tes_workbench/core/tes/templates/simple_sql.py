@@ -43,17 +43,15 @@ class SimpleSQLTemplate(BaseTESTemplate[SimpleSQLUserParams]):
 
         return TESTaskParams(
             name=overrides["name"],
-            executors=[
-                ExecutorTESParams(executor_image=_IMAGE, executor_command=_COMMAND)
-            ],
+            executors=[ExecutorTESParams(image=_IMAGE, command=_COMMAND)],
             description=_DESCRIPTION,
             inputs=[],
             outputs=[
                 OutputTESParams(
-                    output_name="Stdout",
-                    output_description="Stdout results",
-                    output_url=_OUTPUT_URL,
-                    output_path=_OUTPUT_PATH,
+                    name="Output",
+                    description="Output results",
+                    url=_OUTPUT_URL,
+                    path=_OUTPUT_PATH,
                 )
             ],
             volumes=[],

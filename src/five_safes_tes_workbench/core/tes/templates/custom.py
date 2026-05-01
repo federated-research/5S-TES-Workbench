@@ -51,22 +51,23 @@ class CustomTemplate(BaseTESTemplate[CustomUserParams]):
         _INPUTS = overrides.get("inputs", [])
 
         # ---- Validate inputs: input_path is required per entry ----
-        for i, inp in enumerate(_INPUTS):
-            if "input_path" not in inp:
+        for i, input in enumerate(_INPUTS):
+            if "path" not in input:
                 raise TESBuildError(
-                    f"inputs[{i}] is missing required field 'input_path'. "
-                    "input_path is required for every input entry."
+                    f"inputs[{i}] is missing required field 'path'. "
+                    "path is required for every input entry."
                 )
 
         # ---- Validate outputs: output_path and output_url are required per entry ----
-        for i, out in enumerate(_OUTPUTS):
-            missing_output = [
-                field for field in ("output_path", "output_url") if field not in out
+        for i, output in enumerate(_OUTPUTS):
+            missing_output_fields = [
+                field for field in ("path", "url") if field not in output
             ]
-            if missing_output:
+            if missing_output_fields:
                 raise TESBuildError(
-                    f"outputs[{i}] is missing required fields: {missing_output}. "
-                    "output_path and output_url are required for every output entry."
+                    f"outputs[{i}] is missing required fields: "
+                    f"{missing_output_fields}. "
+                    "path and url are required for every output entry."
                 )
 
         return TESTaskParams(
@@ -74,41 +75,39 @@ class CustomTemplate(BaseTESTemplate[CustomUserParams]):
             description=_DESCRIPTION,
             executors=[
                 ExecutorTESParams(
-                    executor_image=executor["executor_image"],
-                    executor_command=executor["executor_command"],
-                    executor_workdir=executor.get("executor_workdir", None),
-                    executor_stdin=executor.get("executor_stdin", None),
-                    executor_stdout=executor.get("executor_stdout", None),
-                    executor_stderr=executor.get("executor_stderr", None),
-                    executor_env=executor.get("executor_env", None),
-                    executor_ignore_error=executor.get("executor_ignore_error", None),
+                    image=executor["image"],
+                    command=executor["command"],
+                    workdir=executor.get("workdir", None),
+                    stdin=executor.get("stdin", None),
+                    stdout=executor.get("stdout", None),
+                    stderr=executor.get("stderr", None),
+                    env=executor.get("env", None),
+                    ignore_error=executor.get("ignore_error", None),
                 )
                 for executor in _EXECUTORS
             ],
             outputs=[
                 OutputTESParams(
-                    output_name=output.get("output_name", "Output"),
-                    output_description=output.get(
-                        "output_description", "Output results"
-                    ),
-                    output_url=output["output_url"],
-                    output_path=output["output_path"],
-                    output_type=output.get("output_type", "DIRECTORY"),
-                    output_path_prefix=output.get("output_path_prefix", None),
+                    name=output.get("name", "Output"),
+                    description=output.get("description", "Output results"),
+                    url=output["url"],
+                    path=output["path"],
+                    type=output.get("type", "DIRECTORY"),
+                    path_prefix=output.get("path_prefix", None),
                 )
                 for output in _OUTPUTS
             ],
             inputs=[
                 InputTESParams(
-                    input_name=inp.get("input_name", None),
-                    input_description=inp.get("input_description", None),
-                    input_url=inp.get("input_url", None),
-                    input_path=inp["input_path"],
-                    input_type=inp.get("input_type", "DIRECTORY"),
-                    input_content=inp.get("input_content", None),
-                    input_streamable=inp.get("input_streamable", None),
+                    name=input.get("name", None),
+                    description=input.get("description", None),
+                    url=input.get("url", None),
+                    path=input["path"],
+                    type=input.get("type", "DIRECTORY"),
+                    content=input.get("content", None),
+                    streamable=input.get("streamable", None),
                 )
-                for inp in _INPUTS
+                for input in _INPUTS
             ],
             volumes=_VOLUMES,
         )
