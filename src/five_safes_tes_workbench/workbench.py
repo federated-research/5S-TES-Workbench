@@ -5,7 +5,7 @@ from .common.params.validate_params import ConfigValidationParams
 from .core.builders.submit_builder import WorkbenchSubmit
 from .core.builders.tes_builder import WorkbenchTESBuilder
 from .core.builders.validate_builder import WorkbenchValidateBuilder
-from .core.minio_client import MinioClientBuilder
+from .core.minio.minio_client import MinioClientBuilder
 from .helpers.children_task import (
     get_child_task_info,
     validate_child_task_status,
