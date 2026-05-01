@@ -65,6 +65,9 @@ def list_results(
     try:
         objects = client.list_objects(resolved_bucket, prefix=prefix, recursive=True)
         names = [obj.object_name for obj in objects]
+        if not names:
+            logger.warning("No result objects found for task %s", task_id)
+            return []
         logger.info("Found %d result object(s) for task %s", len(names), task_id)
         return names
     except Exception as e:
@@ -131,7 +134,14 @@ def _parse_sts_response(response: requests.Response) -> MinioCredentials:
     -------
     A MinioCredentials object.
     """
-    root = ET.fromstring(response.text)
+    try:
+        root = ET.fromstring(response.text)
+    except ET.ParseError as exc:
+        raise RuntimeError(
+            f"STS response is not valid XML (status {response.status_code}). "
+            f"Raw response:\n{response.text!r}"
+        ) from exc
+
     credentials = root.find(".//sts:Credentials", STS_NAMESPACE)
 
     if credentials is None:
