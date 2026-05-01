@@ -120,16 +120,16 @@ class WorkbenchTESBuilder:
 
         return [
             tes.Executor(
-                image=ex["image"],
-                command=ex["command"],
-                workdir=ex.get("workdir"),
-                stdin=ex.get("stdin"),
-                stdout=ex.get("stdout"),
-                stderr=ex.get("stderr"),
-                env=ex.get("env"),
-                ignore_error=ex.get("ignore_error"),
+                image=executor["image"],
+                command=executor["command"],
+                workdir=executor.get("workdir"),
+                stdin=executor.get("stdin"),
+                stdout=executor.get("stdout"),
+                stderr=executor.get("stderr"),
+                env=executor.get("env"),
+                ignore_error=executor.get("ignore_error"),
             )
-            for ex in executors
+            for executor in executors
         ]
 
     @staticmethod
