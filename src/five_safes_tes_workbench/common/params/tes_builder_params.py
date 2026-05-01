@@ -2,33 +2,33 @@ from typing import NotRequired, Required, TypedDict
 
 
 class InputTESParams(TypedDict):
-    input_name: NotRequired[str]
-    input_description: NotRequired[str]
-    input_url: NotRequired[str]
-    input_path: Required[str]
-    input_type: NotRequired[str]
-    input_content: NotRequired[str]
-    input_streamable: NotRequired[bool]
+    name: NotRequired[str | None]
+    description: NotRequired[str | None]
+    url: NotRequired[str | None]
+    path: Required[str]
+    type: NotRequired[str]
+    content: NotRequired[str | None]
+    streamable: NotRequired[bool | None]
 
 
 class OutputTESParams(TypedDict):
-    output_name: NotRequired[str]
-    output_description: NotRequired[str]
-    output_type: NotRequired[str]
-    output_url: Required[str]
-    output_path: Required[str]
-    output_path_prefix: NotRequired[str]
+    name: NotRequired[str]
+    description: NotRequired[str]
+    type: NotRequired[str]
+    url: Required[str]
+    path: Required[str]
+    path_prefix: NotRequired[str | None]
 
 
 class ExecutorTESParams(TypedDict):
-    executor_image: Required[str]
-    executor_command: Required[list[str]]
-    executor_workdir: NotRequired[str]
-    executor_stdin: NotRequired[str]
-    executor_stdout: NotRequired[str]
-    executor_stderr: NotRequired[str]
-    executor_env: NotRequired[dict[str, str]]
-    executor_ignore_error: NotRequired[bool]
+    image: Required[str]
+    command: Required[list[str]]
+    workdir: NotRequired[str | None]
+    stdin: NotRequired[str | None]
+    stdout: NotRequired[str | None]
+    stderr: NotRequired[str | None]
+    env: NotRequired[dict[str, str] | None]
+    ignore_error: NotRequired[bool | None]
 
 
 class TESTaskParams(TypedDict):
@@ -39,6 +39,6 @@ class TESTaskParams(TypedDict):
     name: Required[str]
     executors: Required[list[ExecutorTESParams]]
     description: NotRequired[str]
-    inputs: NotRequired[list[InputTESParams]]
-    outputs: NotRequired[list[OutputTESParams]]
-    volumes: NotRequired[list[str]]
+    inputs: NotRequired[list[InputTESParams] | None]
+    outputs: NotRequired[list[OutputTESParams] | None]
+    volumes: NotRequired[list[str] | None]

@@ -27,24 +27,27 @@ class HelloWorldTemplate(BaseTESTemplate[HelloWorldUserParams]):
         _DESCRIPTION = overrides.get("description", "Hello World")
         _IMAGE = overrides.get("image", "alpine:latest")
         _COMMAND = overrides.get("command", ["echo", "hello world"])
-        _OUTPUT_URL = overrides.get("output_url", "s3://hello-world-output")
+        _OUTPUT_URL = overrides.get("output_url", "s3://")
         _OUTPUT_PATH = overrides.get("output_path", "/outputs")
+        _OUTPUT_STDOUT = _OUTPUT_PATH + "/stdout.txt"
 
         return TESTaskParams(
             name=_NAME,
             description=_DESCRIPTION,
             executors=[
                 ExecutorTESParams(
-                    executor_image=_IMAGE,
-                    executor_command=_COMMAND,
+                    image=_IMAGE,
+                    command=_COMMAND,
+                    workdir=_OUTPUT_PATH,
+                    stdout=_OUTPUT_STDOUT,
                 )
             ],
             outputs=[
                 OutputTESParams(
-                    output_name="Stdout",
-                    output_description="Stdout results",
-                    output_url=_OUTPUT_URL,
-                    output_path=_OUTPUT_PATH,
+                    name="Stdout",
+                    description="Stdout results",
+                    url=_OUTPUT_URL,
+                    path=_OUTPUT_PATH,
                 )
             ],
         )

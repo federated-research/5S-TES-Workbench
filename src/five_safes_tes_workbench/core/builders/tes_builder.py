@@ -81,8 +81,8 @@ class WorkbenchTESBuilder:
 
         name = params["name"]
         executors = self._build_executors(params["executors"])
-        inputs = self._build_inputs(params.get("inputs", []))
-        outputs = self._build_outputs(params.get("outputs", []))
+        inputs = self._build_inputs(params.get("inputs", []) or [])
+        outputs = self._build_outputs(params.get("outputs", []) or [])
         description = params.get("description")
         volumes = params.get("volumes")
 
@@ -95,7 +95,7 @@ class WorkbenchTESBuilder:
             volumes=volumes,
             tags={
                 "project": config.project,
-                "tres": ",".join(config.tres),
+                "tres": "|".join(config.tres),
             },
             logs=None,
             creation_time=datetime.now(timezone.utc),
@@ -120,16 +120,16 @@ class WorkbenchTESBuilder:
 
         return [
             tes.Executor(
-                image=ex["executor_image"],
-                command=ex["executor_command"],
-                workdir=ex.get("executor_workdir"),
-                stdin=ex.get("executor_stdin"),
-                stdout=ex.get("executor_stdout"),
-                stderr=ex.get("executor_stderr"),
-                env=ex.get("executor_env"),
-                ignore_error=ex.get("executor_ignore_error"),
+                image=executor["image"],
+                command=executor["command"],
+                workdir=executor.get("workdir"),
+                stdin=executor.get("stdin"),
+                stdout=executor.get("stdout"),
+                stderr=executor.get("stderr"),
+                env=executor.get("env"),
+                ignore_error=executor.get("ignore_error"),
             )
-            for ex in executors
+            for executor in executors
         ]
 
     @staticmethod
@@ -141,15 +141,15 @@ class WorkbenchTESBuilder:
         """
         return [
             tes.Input(
-                name=i.get("input_name"),
-                description=i.get("input_description"),
-                url=i.get("input_url"),
-                path=i["input_path"],
-                type=i.get("input_type", "FILE"),
-                content=i.get("input_content"),
-                streamable=i.get("input_streamable"),
+                name=input.get("name"),
+                description=input.get("description"),
+                url=input.get("url"),
+                path=input["path"],
+                type=input.get("type", "DIRECTORY"),
+                content=input.get("content"),
+                streamable=input.get("streamable"),
             )
-            for i in inputs
+            for input in inputs
         ]
 
     @staticmethod
@@ -161,12 +161,12 @@ class WorkbenchTESBuilder:
         """
         return [
             tes.Output(
-                name=o.get("output_name"),
-                description=o.get("output_description"),
-                url=o["output_url"],
-                path=o["output_path"],
-                type=o.get("output_type", "DIRECTORY"),
-                path_prefix=o.get("output_path_prefix"),
+                name=output.get("name"),
+                description=output.get("description"),
+                url=output["url"],
+                path=output["path"],
+                type=output.get("type", "DIRECTORY"),
+                path_prefix=output.get("path_prefix"),
             )
-            for o in outputs
+            for output in outputs
         ]

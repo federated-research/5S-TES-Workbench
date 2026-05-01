@@ -1,5 +1,11 @@
 from typing import NotRequired, Required, TypedDict
 
+from five_safes_tes_workbench.common.params.tes_builder_params import (
+    ExecutorTESParams,
+    InputTESParams,
+    OutputTESParams,
+)
+
 
 class CustomUserParams(TypedDict):
     """
@@ -14,8 +20,8 @@ class CustomUserParams(TypedDict):
     """
 
     name: Required[str]
-    image: Required[str]
-    command: Required[list[str]]
-    output_url: NotRequired[str]
-    output_path: NotRequired[str]
+    executors: Required[list[ExecutorTESParams]]
     description: NotRequired[str]
+    inputs: NotRequired[list[InputTESParams]]
+    outputs: NotRequired[list[OutputTESParams]]
+    volumes: NotRequired[list[str]]

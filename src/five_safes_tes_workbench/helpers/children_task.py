@@ -56,7 +56,7 @@ def get_child_task_info(
     )
 
 
-def validate_child_task_status(child_task_info: ChildTaskInfo) -> None:
+def is_child_task_completed(child_task_info: ChildTaskInfo) -> bool:
     """
     Check the status of a child task and return an error message if the task is not completed.
 
@@ -73,11 +73,17 @@ def validate_child_task_status(child_task_info: ChildTaskInfo) -> None:
         or child_task_info.status == TaskStatus.CANCELLED
         or child_task_info.status == TaskStatus.FAILURE
     ):
-        raise RuntimeError(
-            f"Child task {child_task_info.id} is failed or cancelled. Please try again."
+        logger.warning(
+            "Child task %s is failed, cancelled or data out approval rejected. Please try again later.",
+            child_task_info.id,
         )
+        return False
 
     elif child_task_info.status != TaskStatus.COMPLETED:
-        raise RuntimeError(
-            f"Child task {child_task_info.id} is not completed or failed, so results are not available yet. Current status: {TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)]}"
+        logger.warning(
+            "Child task %s is not completed or failed, so results are not available yet. Current status: %s",
+            child_task_info.id,
+            TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)],
         )
+        return False
+    return True
