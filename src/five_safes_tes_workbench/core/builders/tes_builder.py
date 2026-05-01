@@ -95,7 +95,7 @@ class WorkbenchTESBuilder:
             volumes=volumes,
             tags={
                 "project": config.project,
-                "tres": ",".join(config.tres),
+                "tres": "|".join(config.tres),
             },
             logs=None,
             creation_time=datetime.now(timezone.utc),
