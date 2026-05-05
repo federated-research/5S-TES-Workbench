@@ -100,84 +100,20 @@ class Workbench:
         self._last_task_id = task_id
         return task_id
 
-    # ----- MinIO Results Commands -----
+    # ----- MinIO Results Command -----
 
-    def fetch_results_by_tre(
+    def fetch_outputs(
         self,
-        task_id: str | None = None,
         tre: str | None = None,
-        bucket: str | None = None,
-        output_dir: Path | str | None = None,
-    ) -> list[Path]:
-        """
-        Download all output objects for a completed TES task from MinIO to disk.
-
-        Files are saved under ``<output_dir>/<filename>`` where
-        ``output_dir`` defaults to an ``output/`` folder created next to
-        the calling notebook (i.e. ``Path.cwd() / "output"``).
-
-        Authentication is re-used from the earlier :meth:`validate` call.
-        Credentials are exchanged at the configured STS endpoint so that a
-        temporary MinIO session is obtained automatically.
-
-        Parameters
-        ----------
-        - task_id: ID of the task whose results to retrieve. Defaults to
-          the ID returned by the most recent :meth:`submit` call.
-        - tre: Name of the TRE to download the results for.
-        - bucket: Override the output bucket from config. Defaults to
-          ``config.minio_output_bucket``.
-        - output_dir: Directory to write downloaded files into. Defaults
-          to ``Path.cwd() / "output" / <tre>``.
-
-        Returns
-        -------
-        List of :class:`~pathlib.Path` objects for every downloaded file.
-        """
-        resolved_id = task_id or self._last_task_id
-        if resolved_id is None:
-            raise ValueError(
-                "No Submission task ID available. Either call submit() first or pass "
-                "a task_id explicitly to fetch_result_by_tre()."
-            )
-
-        if tre is None:
-            raise ValueError(
-                "No TRE available. Please specify the TRE to fetch the results for."
-            )
-        if tre not in self._validator.config.tres:
-            raise ValueError(
-                f"TRE {tre} not found in the configuration. Please specify a valid TRE."
-            )
-        child_task_info = get_child_task_info(self._validator.config, resolved_id, tre)
-
-        if not is_child_task_completed(child_task_info):
-            return []
-
-        resolved_output_dir = (
-            Path(output_dir)
-            if output_dir is not None
-            else Path.cwd() / "output" / tre / str(child_task_info.id)
-        )
-
-        minio_client = MinioClientBuilder(
-            config=self._validator.config,
-            auth=self._validator.auth,
-        )
-
-        return minio_client.download_results(
-            child_task_info.id, resolved_output_dir, bucket=bucket
-        )
-
-    def fetch_all_results(
-        self,
-        task_id: str | None = None,
-        bucket: str | None = None,
+        task_id: int | None = None,
         output_dir: Path | str | None = None,
     ) -> dict[str, list[Path]]:
         """
         Download all output objects for a completed TES task from MinIO to disk
         for every configured TRE.
+
+        If a TRE is specified, only the output objects for that TRE are downloaded.
+        If no TRE is specified, all output objects for all TREs are downloaded.
 
         Files are saved under ``<output_dir>/<tre>/<filename>`` where
         ``output_dir`` defaults to an ``output/`` folder created next to
@@ -189,20 +125,20 @@ class Workbench:
 
         Parameters
         ----------
+        - tre: Name of the TRE whose results to retrieve. If not specified, all TREs are retrieved.
         - task_id: ID of the task whose results to retrieve. Defaults to
           the ID returned by the most recent :meth:`submit` call.
-        - bucket: Override the output bucket from config. Defaults to
-          ``config.minio_output_bucket``.
         - output_dir: Root directory for downloads. Each TRE gets its own
           sub-folder ``<output_dir>/<tre>/``. Defaults to
-          ``Path.cwd() / "output"``.
+          ``Path.cwd() / "output" / <tre> / <task_id>``.
 
         Returns
         -------
         Dict mapping each TRE name to the list of
         :class:`~pathlib.Path` objects for its downloaded files.
         """
-        resolved_id = task_id or self._last_task_id
+        resolved_id = str(task_id) if task_id is not None else self._last_task_id
+
         if resolved_id is None:
             raise ValueError(
                 "No Submission task ID available. Either call submit() first or pass "
@@ -215,12 +151,18 @@ class Workbench:
             config=self._validator.config,
             auth=self._validator.auth,
         )
-        for tre in self._validator.config.tres:
+
+        if tre is not None:
+            if tre not in self._validator.config.tres:
+                raise ValueError(
+                    f"TRE {tre} not found in the configuration. Please specify a valid TRE."
+                )
             child_task_info = get_child_task_info(
                 self._validator.config, resolved_id, tre
             )
+
             if not is_child_task_completed(child_task_info):
-                continue
+                results[tre] = []
 
             resolved_output_dir = (
                 Path(output_dir)
@@ -228,7 +170,24 @@ class Workbench:
                 else Path.cwd() / "output" / tre / str(child_task_info.id)
             )
             results[tre] = minio_client.download_results(
-                child_task_info.id, resolved_output_dir, bucket=bucket
+                child_task_info.id, resolved_output_dir
             )
+            return results
+        else:
+            for tre_in_config in self._validator.config.tres:
+                child_task_info = get_child_task_info(
+                    self._validator.config, resolved_id, tre_in_config
+                )
+                if not is_child_task_completed(child_task_info):
+                    continue
+
+                resolved_output_dir = (
+                    Path(output_dir)
+                    if output_dir is not None
+                    else Path.cwd() / "output" / tre_in_config / str(child_task_info.id)
+                )
+                results[tre_in_config] = minio_client.download_results(
+                    child_task_info.id, resolved_output_dir
+                )
 
         return results

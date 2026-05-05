@@ -46,8 +46,9 @@ def get_child_task_info(
             f"No child task info found for parent task {parent_task_id} and TRE {tre}"
         )
     logger.info(
-        "Child task info: %s, status: %s",
+        "Child task info: %s, TRE: %s, status: %s",
         child_task_info["id"],
+        tre,
         TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info["status"])],
     )
     return ChildTaskInfo(
@@ -74,14 +75,16 @@ def is_child_task_completed(child_task_info: ChildTaskInfo) -> bool:
         or child_task_info.status == TaskStatus.FAILURE
     ):
         logger.warning(
-            "Child task %s is failed, cancelled or data out approval rejected. Please try again later.",
+            "Child task %s is failed, cancelled or data out approval rejected."
+            "Please try again later.",
             child_task_info.id,
         )
         return False
 
     elif child_task_info.status != TaskStatus.COMPLETED:
         logger.warning(
-            "Child task %s is not completed or failed, so results are not available yet. Current status: %s",
+            "Child task %s is not completed or failed, so results are not available yet."
+            "Current status: %s",
             child_task_info.id,
             TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)],
         )
