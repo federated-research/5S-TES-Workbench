@@ -287,4 +287,94 @@ wb.build_tes.custom(
 wb.submit()
 ```
 
+### **Pool Results**
+
+Once a task has been submitted and completed, you can download the output files from MinIO storage using the fetch methods.
+
+**Note:** The task must have reached a `Completed` status before fetching results.
+
+
+#### **Output Directory Structure**
+
+Downloaded files are saved in an output/ folder created **next to your notebook**, organised by TRE name and child task ID:
+
+```bash
+output/
+└── <tre_name>/
+    └── <child_task_id>/
+        ├── output.json
+        └── acro_output_20260501_085731.zip
+```
+
+
+
+
+#### Fetch results for all TREs — wb.fetch_all_results()
+
+Downloads output files for all TRE defined in `wb.validate()`.
+
+If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
+
+- If no task has been submitted and no `task_id` is passed, the method will raise a `ValueError`.
+
+
+```python
+# Uses task ID from the most recent wb.submit()
+wb.fetch_all_results()
+
+# Or with an explicit task ID (e.g. fetching results from a previous session)
+wb.fetch_all_results(task_id="your-task-id")
+```
+
+
+#### Fetch results for a single TRE — wb.fetch_results_by_tre()
+
+Downloads output files for one specific TRE. The `tre` value must match one of the TRE names provided in `wb.validate(tres=[...])`. Passing an unknown TRE name will raise a `ValueError`.
+
+If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
+
+- If no task has been submitted and no `task_id` is passed, the method will raise a `ValueError`.
+
+```python
+# Uses task ID from the most recent wb.submit()
+wb.fetch_results_by_tre(tre="Nottingham TRE 01")
+
+# Or with an explicit task ID (e.g. fetching results from a previous session)
+wb.fetch_results_by_tre(
+    task_id="your-task-id",
+    tre="Nottingham TRE 01",
+)
+```
+
+
+
+#### **What to Expect**
+
+When fetching results, the Workbench will log each step of the process (eg: see below) and downloaded can be found in the directory.
+
+```bash
+INFO | Child task info: 945, status: Completed
+INFO | Fetching token from keycloak...
+INFO | Keycloak token fetched successfully
+INFO | Exchanging bearer token for MinIO credentials via STS
+INFO | MinIO client initialised
+INFO | Found 2 result object(s) for task 945
+INFO | Downloading result object: 945/acro_output_20260501_085731.zip
+INFO | Downloaded -> output/Nottingham TRE 01/945/acro_output_20260501_085731.zip
+INFO | Downloading result object: 945/output.json
+INFO | Downloaded -> output/Nottingham TRE 01/945/output.json
+```
+
+
+## Example Implementation (Jupyter Notebook)
+
+A fully working notebook is available alongside this guide ([workbench-example.ipynb](src/five_safes_tes_workbench/notebooks/workbench-example.ipynb))
+
+It contains ready-to-run cells covering all four steps: 
+- validation
+- building a TES task using each template 
+- submitting
+- fetching results
+
+It is the quickest way to get started and verify your setup end-to-end. For a deeper explanation of any method, parameter, or behavior, refer back to this user guide.
 
