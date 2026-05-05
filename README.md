@@ -347,7 +347,21 @@ wb.fetch_outputs(task_id=945, tre="Nottingham TRE 01")
 
 #### **What to Expect**
 
-When fetching results, the Workbench will log each step of the process (eg: see below) and downloaded can be found in the directory.
+Before downloading any files, the Workbench **first queries the submission layer** to check the current status of each child task (the per-TRE sub-task created when you called `wb.submit()`). Only tasks that have reached `Completed` status will have their files fetched from MinIO. Tasks that are still running or have terminated with an error are skipped.
+
+You can also check the submission layer to see the progress of the submission [`https://5s-tes.federated-research.com/`](https://5s-tes.federated-research.com/).
+
+**TRE behavior by state**
+
+| Child Task State | Example Statuses | Behavior |
+| --- | --- | --- |
+| **In progress** | Running, Pod Processing, Waiting for Agent, Data Out Approval Begun... | Skipped: warning logged, no files downloaded for that TRE |
+| **Terminated** | Failed, Cancelled, Data Out Rejected | Skipped: warning logged, no files downloaded for that TRE |
+| **Completed** | Completed | Files downloaded from MinIO into `output/<tre>/<child_task_id>/` |
+
+When fetching for **all TREs** (no `tre` argument passed), each TRE is evaluated independently. Completed TREs are downloaded straight away while in-progress or terminated TREs are skipped without affecting the others. You can re-run `wb.fetch_outputs()` at any point and previously downloaded TREs will be overwritten and any that were not yet complete will be retried.
+
+**Example — single TRE, completed**
 
 ```bash
 INFO | Child task info: 945, status: Completed
