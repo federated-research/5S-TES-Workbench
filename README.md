@@ -339,7 +339,7 @@ The `wb.fetch_output()` method will pool results from the TRE for the submission
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `tre` | No | TRE name to fetch results for. If omitted, results for **all TREs** in config are downloaded |
+| `tre` | No | TRE name to fetch results for. If omitted, Workbench will attempt to download results for **all TREs** in configs |
 | `task_id` | No | Integer task ID. Defaults to the ID from the most recent `wb.submit()` call |
 
 - If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
