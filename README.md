@@ -52,14 +52,14 @@ The required parameters are structured into two types.
 
  The configuration parameters are required to establish a connection to the TES endpoint, MinIO storage and define which TREs the task will be submitted to.
 
-    | Parameter | Description |
-    | --- | --- |
-    | project | Project name |
-    | tes_base_url | Base URL of the TES service |
-    | minio_sts_endpoint | MinIO STS endpoint URL |
-    | minio_endpoint | MinIO endpoint URL |
-    | minio_output_bucket | MinIO output bucket name |
-    | tres | List of TRE names to target |
+| Parameter | Description |
+| --- | --- |
+| project | Project name |
+| tes_base_url | Base URL of the TES service |
+| minio_sts_endpoint | MinIO STS endpoint URL |
+| minio_endpoint | MinIO endpoint URL |
+| minio_output_bucket | MinIO output bucket name |
+| tres | List of TRE names to target |
 
 <br>
 
@@ -71,18 +71,18 @@ You can either provide Keycloak Credentials or Direct Access Key.
 
 **Keycloak Credentials**
 
-    | Parameter | Description |
-    | --- | --- |
-    | client_id / client_secret | Keycloak client credentials |
-    | username / password | Keycloak user credentials |
-    | keycloak_url | Keycloak base URL |
+| Parameter | Description |
+| --- | --- |
+| client_id / client_secret | Keycloak client credentials |
+| username / password | Keycloak user credentials |
+| keycloak_url | Keycloak base URL |
 
     
 **Direct Access Token**
 
-    | Parameter | Description |
-    | --- | --- |
-    | access_token | Pre-obtained access token from the Submission UI |
+| Parameter | Description |
+| --- | --- |
+| access_token | Pre-obtained access token from the Submission UI |
 
 
 ### Passing the Required Parameters into Workbench
