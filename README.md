@@ -313,42 +313,34 @@ output/
 
 
 
+#### Fetch Results - wb.fetch_outputs()
 
-#### Fetch results for all TREs — wb.fetch_all_results()
+The `wb.fetch_output()` method will pool results from the TRE for the submissions made in the previous steps. This method works based on the parameters defined (see params table below).
 
-Downloads output files for all TRE defined in `wb.validate()`.
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `tre` | No | TRE name to fetch results for. If omitted, results for **all TREs** in config are downloaded |
+| `task_id` | No | Integer task ID. Defaults to the ID from the most recent `wb.submit()` call |
 
-If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
-
-- If no task has been submitted and no `task_id` is passed, the method will raise a `ValueError`.
-
-
-```python
-# Uses task ID from the most recent wb.submit()
-wb.fetch_all_results()
-
-# Or with an explicit task ID (e.g. fetching results from a previous session)
-wb.fetch_all_results(task_id="your-task-id")
-```
-
-
-#### Fetch results for a single TRE — wb.fetch_results_by_tre()
-
-Downloads output files for one specific TRE. The `tre` value must match one of the TRE names provided in `wb.validate(tres=[...])`. Passing an unknown TRE name will raise a `ValueError`.
-
-If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
+- If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
 
 - If no task has been submitted and no `task_id` is passed, the method will raise a `ValueError`.
 
-```python
-# Uses task ID from the most recent wb.submit()
-wb.fetch_results_by_tre(tre="Nottingham TRE 01")
+<br>
 
-# Or with an explicit task ID (e.g. fetching results from a previous session)
-wb.fetch_results_by_tre(
-    task_id="your-task-id",
-    tre="Nottingham TRE 01",
-)
+**Example Implementation**
+```python
+# Fetch results for all TREs (uses last submitted task ID)
+wb.fetch_outputs()
+
+# Fetch results for a specific TRE
+wb.fetch_outputs(tre="Nottingham TRE 01")
+
+# Fetch with an explicit task ID (e.g. from a previous submission)
+wb.fetch_outputs(task_id=945)
+
+# Fetch for a specific TRE with an explicit task ID
+wb.fetch_outputs(task_id=945, tre="Nottingham TRE 01")
 ```
 
 
