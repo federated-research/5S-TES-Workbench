@@ -25,7 +25,7 @@ Before using the Workbench, ensure you have the following:
     
 - Access to a running **TES endpoint**
 - Access to a **MinIO** instance with an output bucket configured
-- Valid **authentication credentials** either a pre-obtained access token or Keycloak client/user credentials provided by your TRE administrator
+- Valid **authentication credentials**, which are either a pre-obtained access token from Submission Layer UI or Submission API's Keycloak credentials provided by Submission layer's administrator
 
 
 ## Validation
