@@ -209,7 +209,7 @@ Executes a SQL query against a SQL database using the federated SQL analysis too
 **Example Implementation**
 
 ```bash
-_query = (
+query = (
     'WITH user_query AS ('
     'SELECT value_as_number FROM "NottinghamDemo".measurement '
     'WHERE measurement_concept_id = 3000905 '
@@ -219,7 +219,7 @@ _query = (
 
 wb.build_tes.simple_sql(
     name="Simple SQL Task",
-    query=_query,
+    query=query,
 )
 
 wb.submit()
