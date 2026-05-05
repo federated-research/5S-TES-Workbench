@@ -46,8 +46,9 @@ def get_child_task_info(
             f"No child task info found for parent task {parent_task_id} and TRE {tre}"
         )
     logger.info(
-        "Child task info: %s, status: %s",
+        "Child task info: %s, TRE: %s, status: %s",
         child_task_info["id"],
+        tre,
         TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info["status"])],
     )
     return ChildTaskInfo(
