@@ -282,7 +282,7 @@ A fully user-defined task. `name`, `image`, and `command` are required. All 
 
 All the parameters in the custom method can be overridden within the template. 
 
-For more information about constructing a custom TES message, view the link [[How to create a TES message](https://ga4gh.github.io/task-execution-schemas/docs/#tag/TaskService/operation/CreateTask)].
+For more information about constructing a custom TES message, view [[the official schema of TES from GA4GH](https://ga4gh.github.io/task-execution-schemas/docs/#tag/TaskService/operation/CreateTask)].
 
 **Example Implementation**
 
