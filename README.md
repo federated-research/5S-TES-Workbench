@@ -396,7 +396,7 @@ INFO | Downloaded -> output/Nottingham TRE 01/945/acro_output_20260501_085731.zi
 INFO | Downloading result object: 945/output.json
 INFO | Downloaded -> output/Nottingham TRE 01/945/output.json
 ```
-
+If one or more results are not ready, either because they have terminated without releasing results (e.g., failed executor, cancelled task or rejected at egress) or they are still in progress, they will raise a warning and move on to the next task. Results for tasks which have been completed successfully will still be downloaded.
 
 ## Example Implementation (Jupyter Notebook)
 
