@@ -48,26 +48,27 @@ The required parameters are structured into two types.
 
 - **Config Params:** The configuration parameters are required to establish a connection to the TES endpoint, MinIO storage and define which TREs the task will be submitted to.
 
-| Parameter | Description |
-| --- | --- |
-| project | Project name |
-| tes_base_url | Base URL of the TES service |
-| minio_sts_endpoint | MinIO STS endpoint URL |
-| minio_endpoint | MinIO endpoint URL |
-| minio_output_bucket | MinIO output bucket name |
-| tres | List of TRE names to target |
+    | Parameter | Description |
+    | --- | --- |
+    | project | Project name |
+    | tes_base_url | Base URL of the TES service |
+    | minio_sts_endpoint | MinIO STS endpoint URL |
+    | minio_endpoint | MinIO endpoint URL |
+    | minio_output_bucket | MinIO output bucket name |
+    | tres | List of TRE names to target |
 
+<br>
 
 - **Auth Params:** The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token.
 
-You can either provide Keycloak Credentials or Direct Access Key
+    You can either provide Keycloak Credentials or Direct Access Key.
 
-| Parameter | Description |
-| --- | --- |
-| access_token | Pre-obtained access token from the Submission UI |
-| client_id / client_secret | Keycloak client credentials |
-| username / password | Keycloak user credentials |
-| keycloak_url | Keycloak base URL |
+    | Parameter | Description |
+    | --- | --- |
+    | access_token | Pre-obtained access token from the Submission UI |
+    | client_id / client_secret | Keycloak client credentials |
+    | username / password | Keycloak user credentials |
+    | keycloak_url | Keycloak base URL |
 
 
 #### Option A - Direct Params
@@ -75,6 +76,8 @@ You can either provide Keycloak Credentials or Direct Access Key
 The next step is to validate the user using the required parameters. There are two ways to provide your configuration for validation: 
 
 Parse the parameters directly as a keyword arguments. There are two further ways to do it. 
+
+<br>
 
 - **Parsing the Configuration params and Authentication params**
 
@@ -96,6 +99,8 @@ wb.validate(
     keycloak_url="http://your-keycloak-endpoint/",
 )
 ```
+
+<br>
 
 - **Parsing the Configuration params and Access Token**
 
