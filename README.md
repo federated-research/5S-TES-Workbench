@@ -27,10 +27,7 @@ Before using the Workbench, ensure you have the following:
 - Access to a **MinIO** instance with an output bucket configured
 - Valid **authentication credentials**, which are either a pre-obtained access token from Submission Layer UI or Submission API's Keycloak credentials provided by Submission layer's administrator
 
-
-## Validation
-
-Before building or submitting any task, you must validate your configuration and credentials by calling `wb.validate()`.
+## Initialize the Workbench
 
 The first step will be importing the workbench from the pip package as follows and initialize the client.
 
@@ -40,13 +37,20 @@ from five_safes_tes_workbench.workbench import Workbench
 wb = Workbench()
 ```
 
+## Validation
+
+Before building or submitting any task, you must validate your configuration and credentials by calling `wb.validate()`.
+
+
 ### Required Params
 
 This section explains the required parameters to validate the user before building the TES message and submitting into the submission layer of the 5S-TES. 
 
 The required parameters are structured into two types. 
 
-- **Config Params:** The configuration parameters are required to establish a connection to the TES endpoint, MinIO storage and define which TREs the task will be submitted to.
+#### Config Params
+
+ The configuration parameters are required to establish a connection to the TES endpoint, MinIO storage and define which TREs the task will be submitted to.
 
     | Parameter | Description |
     | --- | --- |
@@ -59,21 +63,35 @@ The required parameters are structured into two types.
 
 <br>
 
-- **Auth Params:** The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token.
+#### Auth Params
 
-    You can either provide Keycloak Credentials or Direct Access Key.
+The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token.
+
+You can either provide Keycloak Credentials or Direct Access Key.
+
+**Keycloak Credentials**
 
     | Parameter | Description |
     | --- | --- |
-    | access_token | Pre-obtained access token from the Submission UI |
     | client_id / client_secret | Keycloak client credentials |
     | username / password | Keycloak user credentials |
     | keycloak_url | Keycloak base URL |
 
+    
+**Direct Access Token**
 
-#### Option A - Direct Params
+    | Parameter | Description |
+    | --- | --- |
+    | access_token | Pre-obtained access token from the Submission UI |
+
+
+### Passing the Required Parameters into Workbench
 
 The next step is to validate the user using the required parameters. There are two ways to provide your configuration for validation: 
+- Option A - Direct Params
+- Option B - Yaml Config File
+
+#### Option A - Direct Params
 
 Parse the parameters directly as a keyword arguments. There are two further ways to do it. 
 
@@ -180,8 +198,8 @@ The Workbench provides a template-based interface via `wb.build_tes.<template>(
 | --- | --- | --- |
 | Hello World | build_tes.hello_world(...) | Verify the setup is working end-to-end |
 | Simple SQL | build_tes.simple_sql(...) | Run a SQL query against a TRE database |
-| Custom | build_tes.custom(...) | Bring your own container image and command |
 | Bunny | build_tes.bunny(...) | Run the Health Informatics Bunny CLI analytics tool |
+| Custom | build_tes.custom(...) | Bring your own container image and command |
 
 
 #### Hello World - wb.build_tes.hello_world( )
@@ -199,7 +217,7 @@ wb.submit()
 
 #### Simple SQL - wb.build_tes.simple_sql( )
 
-Executes a SQL query against a SQL database using the federated SQL analysis tool. All the parameters in the simple sql method can be overridden within the template. 
+Executes a SQL query against a SQL database using the uses default image : `harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0`
 
 | Parameters | Required  | Description |
 | --- | --- | --- | --- |
@@ -228,14 +246,16 @@ wb.submit()
 
 #### Bunny - wb.build_tes.bunny( )
 
-Runs the Health Informatics Bunny CLI analytics container. The container image is fixed by the template. You provide the command list which is passed directly to the Bunny CLI. 
+Runs the Health Informatics Bunny CLI analytics container. The container image is fixed by the template: `ghcr.io/health-informatics-uon/five-safes-tes-analytics-bunny-cli:1.6.0`
+
+ You provide the command list which is passed directly to the Bunny CLI. 
 
 All the parameters in the bunny method can be overridden within the template. 
 
-| Parameter | Required | Default | Description |
-| --- | --- | --- | --- |
-| name | Yes | — | Task name |
-| command | Yes | — | Arguments passed to the Bunny CLI |
+| Parameter | Required  | Description |
+| --- | --- | --- |
+| name | Yes | Task name |
+| command | Yes | Arguments passed to the Bunny CLI |
 
 **Example Implementation**
 
