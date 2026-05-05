@@ -16,7 +16,7 @@ The typical workflow consists of four steps:
 
 Before using the Workbench, ensure you have the following:
 
-- **Python 3.11+** installed
+- **Python 3.13+** installed
 - **`five-safes-tes-workbench`** package installed in your environment:
     
     ```bash
