@@ -70,7 +70,7 @@ You can either provide Keycloak Credentials or Direct Access Key
 | keycloak_url | Keycloak base URL |
 
 
-### Option A - Direct Params
+#### Option A - Direct Params
 
 The next step is to validate the user using the required parameters. There are two ways to provide your configuration for validation: 
 
@@ -118,7 +118,7 @@ wb.validate(
 )
 ```
 
-### Option B - **YAML Config File**
+#### Option B - **YAML Config File**
 
 Instead of passing the params directly as a keyword, you can create a .yaml file (which holds the Credentials and Authentication Params) and pass the path as a parameter within the validate. An example .yaml can be found here [[example-config.yml](example-config.yml)].
 
@@ -161,3 +161,130 @@ config:
     password: "your-keycloak-password"
     keycloak_url: "http://localhost:your-keycloak-port/"
 ```
+
+
+### **Build TES and Submit**
+
+Once the Workbench has been validated, the next step is to build the TES task. 
+
+The Workbench provides a template-based interface via `wb.build_tes.<template>(...)` which constructs the TES message that will be submitted to the endpoint.
+
+**The available Templates are mentioned below:** 
+
+| Template | Method | Use Case |
+| --- | --- | --- |
+| Hello World | build_tes.hello_world(...) | Verify the setup is working end-to-end |
+| Simple SQL | build_tes.simple_sql(...) | Run a SQL query against a TRE database |
+| Custom | build_tes.custom(...) | Bring your own container image and command |
+| Bunny | build_tes.bunny(...) | Run the Health Informatics Bunny CLI analytics tool |
+
+
+#### Hello World - wb.build_tes.hello_world( )
+
+The simplest template. Every parameter is optional and can be called with no arguments at all and will fall back to sensible defaults. Use it to verify connectivity before running real analysis.
+
+**Example Implementation**
+
+```bash
+# Minimal — no parameters needed
+wb.build_tes.hello_world()
+
+wb.submit()
+```
+
+#### Simple SQL - wb.build_tes.simple_sql( )
+
+Executes a SQL query against a SQL database using the federated SQL analysis tool. All the parameters in the simple sql method can be overridden within the template. 
+
+| Parameters | Required | Default | Description |
+| --- | --- | --- | --- |
+| name | Yes | — | Task name |
+| query | Yes | — | SQL query to execute |
+
+**Example Implementation**
+
+```bash
+_query = (
+    'WITH user_query AS ('
+    'SELECT value_as_number FROM "NottinghamDemo".measurement '
+    'WHERE measurement_concept_id = 3000905 '
+    'AND value_as_number IS NOT NULL'
+    ') SELECT COUNT(*) AS n, SUM(value_as_number) AS total FROM user_query;'
+)
+
+wb.build_tes.simple_sql(
+    name="Simple SQL Task",
+    query=_query,
+)
+
+wb.submit()
+```
+
+
+#### Bunny - wb.build_tes.bunny( )
+
+Runs the Health Informatics Bunny CLI analytics container. The container image is fixed by the template. You provide the command list which is passed directly to the Bunny CLI. 
+
+All the parameters in the bunny method can be overridden within the template. 
+
+| Parameter | Required | Default | Description |
+| --- | --- | --- | --- |
+| name | Yes | — | Task name |
+| command | Yes | — | Arguments passed to the Bunny CLI |
+
+**Example Implementation**
+
+```bash
+wb.build_tes.bunny(
+    name="Bunny Task",
+    command=[
+        "--body-json",
+        '{"code":"GENERIC","analysis":"DISTRIBUTION","uuid":"123","collection":"test","owner":"me"}',
+        "--output",
+        "/outputs/output.json",
+        "--no-encode",
+    ],
+)
+
+wb.submit()
+```
+
+
+
+#### Custom - wb.build_tes.custom( )
+
+A fully user-defined task. name, image, and command are required. All other fields fall back to defaults if not provided.
+
+All the parameters in the custom method can be overridden within the template. 
+
+For more information about constructing a custom TES message, view the link [[How to create a TES message](https://ga4gh.github.io/task-execution-schemas/docs/#tag/TaskService/operation/CreateTask)].
+
+**Example Implementation**
+
+```bash
+wb.build_tes.custom(
+    name="Test Custom mode from Workbench",
+    description="custom analysis",
+    executors=[
+        {
+            "image": "ubuntu",
+            "command": ["echo", "Hello World"],
+            "workdir": "/outputs",
+            "stdout": "/outputs/stdout"
+        }
+    ],
+    outputs=[
+        {
+            "name": "Stdout",
+            "description": "Stdout results",
+            "url": "s3://",
+            "path": "/outputs",
+            "type": "DIRECTORY"
+        }
+    ],
+)
+
+wb.submit()
+```
+
+
