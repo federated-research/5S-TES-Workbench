@@ -201,7 +201,7 @@ wb.submit()
 
 Executes a SQL query against a SQL database using the federated SQL analysis tool. All the parameters in the simple sql method can be overridden within the template. 
 
-| Parameters | Required | Default | Description |
+| Parameters | Required  | Description |
 | --- | --- | --- | --- |
 | name | Yes | — | Task name |
 | query | Yes | — | SQL query to execute |
