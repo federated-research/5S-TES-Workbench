@@ -138,7 +138,7 @@ class Workbench:
         :class:`~pathlib.Path` objects for its downloaded files.
         """
         resolved_id = str(task_id) if task_id is not None else self._last_task_id
-        print("resolved_id", resolved_id)
+
         if resolved_id is None:
             raise ValueError(
                 "No Submission task ID available. Either call submit() first or pass "
