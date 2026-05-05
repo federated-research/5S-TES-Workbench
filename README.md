@@ -258,7 +258,7 @@ wb.submit()
 
 #### Custom - wb.build_tes.custom( )
 
-A fully user-defined task. name, image, and command are required. All other fields fall back to defaults if not provided.
+A fully user-defined task. `name`, `image`, and `command` are required. All other fields fall back to defaults if not provided.
 
 All the parameters in the custom method can be overridden within the template. 
 
