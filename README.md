@@ -65,9 +65,9 @@ The required parameters are structured into two types.
 
 #### Auth Params
 
-The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token (direct access key).
+The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token.
 
-You can either provide Keycloak Credentials or Direct Access Key.
+You can either provide Keycloak Credentials or Access Key.
 
 **Keycloak Credentials**
 
@@ -78,7 +78,7 @@ You can either provide Keycloak Credentials or Direct Access Key.
 | keycloak_url | Keycloak base URL |
 
     
-**Direct Access Token**
+** Access Token**
 
 | Parameter | Description |
 | --- | --- |
