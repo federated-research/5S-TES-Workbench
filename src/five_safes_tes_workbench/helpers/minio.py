@@ -38,7 +38,6 @@ def list_results(
     client: Minio,
     config: ConfigValidationModel,
     task_id: str,
-    bucket: str | None = None,
 ) -> list[str]:
     """
     List all output objects written by a task.
@@ -49,8 +48,6 @@ def list_results(
     Parameters
     ----------
     - task_id: ID returned by the TES submission.
-    - bucket: Override the bucket from config. Defaults to
-        ``config.minio_output_bucket``.
     - client: MinIO client (should be already initialised before calling this function).
     - config: ConfigValidationModel (should be already validated before calling this function).
 
@@ -59,12 +56,12 @@ def list_results(
     List of object names found under the task prefix.
     """
 
-    resolved_bucket = bucket or config.minio_output_bucket
+    resolved_bucket = config.minio_output_bucket
     prefix = f"{task_id}/"
 
     try:
         objects = client.list_objects(resolved_bucket, prefix=prefix, recursive=True)
-        names = [obj.object_name for obj in objects]
+        names = [obj.object_name for obj in objects if obj.object_name is not None]
         if not names:
             logger.warning("No result objects found for task %s", task_id)
             return []
@@ -80,7 +77,6 @@ def download_result(
     config: ConfigValidationModel,
     object_path: str,
     output_dir: Path,
-    bucket: str | None = None,
 ) -> Path:
     """
     Download a single result object from MinIO to a local file.
@@ -95,13 +91,12 @@ def download_result(
     - object_path: Full object path within the bucket (e.g.
         ``"<task_id>/output.csv"``).
     - output_dir: Local directory to write the file into.
-    - bucket: Override the bucket from config.
 
     Returns
     -------
     The :class:`~pathlib.Path` of the downloaded local file.
     """
-    resolved_bucket = bucket or config.minio_output_bucket
+    resolved_bucket = config.minio_output_bucket
 
     # Strip the leading <task_id>/ prefix so the filename is clean.
     parts = object_path.split("/", 1)

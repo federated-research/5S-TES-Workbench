@@ -64,7 +64,6 @@ class MinioClientBuilder:
         self,
         task_id: str,
         output_dir: Path,
-        bucket: str | None = None,
     ) -> list[Path]:
         """
         Download all output objects for a task to a local directory.
@@ -84,14 +83,12 @@ class MinioClientBuilder:
         List of :class:`~pathlib.Path` objects pointing to every downloaded
         file.
         """
-        object_paths = list_results(self._client, self._config, task_id, bucket=bucket)
+        object_paths = list_results(self._client, self._config, task_id)
 
         downloaded: list[Path] = []
         for path in object_paths:
             logger.info("Downloading result object: %s", path)
-            local_path = download_result(
-                self._client, self._config, path, output_dir, bucket=bucket
-            )
+            local_path = download_result(self._client, self._config, path, output_dir)
             downloaded.append(local_path)
 
         return downloaded
