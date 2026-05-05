@@ -219,10 +219,10 @@ wb.submit()
 
 Executes a SQL query against a SQL database using the uses default image : `harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0`
 
-| Parameters | Required  | Description |
-| --- | --- | --- | --- |
-| name | Yes | — | Task name |
-| query | Yes | — | SQL query to execute |
+| Parameter | Required | Description |
+| --- | --- | --- |
+| name | Yes | Task name |
+| query | Yes | SQL query to execute |
 
 **Example Implementation**
 
