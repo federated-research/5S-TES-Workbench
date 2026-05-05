@@ -9,7 +9,7 @@ The typical workflow consists of four steps:
 - **Validate:** Provide your infrastructure configuration and credentials.
 - **Build:** Choose a task template and supply your analysis parameters.
 - **Submit:** Send the task to the TES endpoint.
-- **Pool Results:** Fetch output files from MinIO storage once the task completes.
+- **Fetch Results:** Fetch output files from MinIO storage once the task completes.
 
 
 ## Pre-Requisites
