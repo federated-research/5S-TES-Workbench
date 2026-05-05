@@ -292,7 +292,7 @@ wb.build_tes.custom(
 wb.submit()
 ```
 
-### **Pool Results**
+### **Collect Results**
 
 Once a task has been submitted and completed, you can download the output files from MinIO storage using the fetch methods.
 
