@@ -101,8 +101,3 @@ class WorkbenchValidateBuilder():
         logger.info("Validation successful")
         logger.info("Config: %s", self._config)
         logger.info("Auth mode: %s", self._auth.auth_mode)
-
-        if self._auth.auth_mode == AuthMode.ACCESS_TOKEN:
-            logger.info("Access Token: %s", self._auth.access_token)
-        else:
-            logger.info("Auth: %s", self._auth)
