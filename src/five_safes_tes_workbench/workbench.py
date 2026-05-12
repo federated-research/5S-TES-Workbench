@@ -142,7 +142,7 @@ class Workbench:
         if resolved_id is None:
             raise ValueError(
                 "No Submission task ID available. Either call submit() first or pass "
-                "a task_id explicitly to fetch_all_results()."
+                "a task_id explicitly to fetch_outputs()."
             )
 
         results: dict[str, list[Path]] = {}
