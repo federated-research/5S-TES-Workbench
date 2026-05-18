@@ -84,7 +84,7 @@ def is_child_task_completed(child_task_info: ChildTaskInfo) -> bool:
 
     elif child_task_info.status != TaskStatus.COMPLETED:
         logger.warning(
-            "Child task %s has not yet completed, so results are not available yet. "
+            "Child task %s has not yet completed, so results are not available. "
             "Current status: %s",
             child_task_info.id,
             TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)],
