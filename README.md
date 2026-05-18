@@ -42,13 +42,13 @@ wb = Workbench()
 Before building or submitting any task, you must validate your configuration and credentials by calling `wb.validate()`.
 
 
-### Required Params
+### Required Parameters
 
 This section explains the required parameters to validate the user before building the TES message and submitting into the submission layer of the 5S-TES. 
 
 The required parameters are structured into two types. 
 
-#### Config Params
+#### Config Parameters
 
  The configuration parameters are required to establish a connection to the TES endpoint, MinIO storage and define which TREs the task will be submitted to.
 
@@ -63,7 +63,7 @@ The required parameters are structured into two types.
 
 <br>
 
-#### Auth Params
+#### Auth Parameters
 
 The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token.
 
@@ -78,7 +78,7 @@ You can either provide Keycloak Credentials or Access Key.
 | keycloak_url | Keycloak base URL |
 
     
-** Access Token**
+**Access Token**
 
 | Parameter | Description |
 | --- | --- |
@@ -88,20 +88,20 @@ You can either provide Keycloak Credentials or Access Key.
 ### Passing the Required Parameters into Workbench
 
 The next step is to validate the user using the required parameters. There are two ways to provide your configuration for validation: 
-- Option A - Direct Params
+- Option A - Direct Parameters
 - Option B - Yaml Config File
 
-#### Option A - Direct Params
+#### Option A - Direct Parameters
 
 Parse the parameters directly as a keyword arguments. There are two further ways to do it. 
 
 <br>
 
-- **Parsing the Configuration params and Authentication params**
+- **Parsing the Configuration parameters and Authentication parameters**
 
 ```bash
 wb.validate(
-		# --- Config Params ---
+		# --- Config parameters ---
     project="your-project-name",
     tes_base_url="http://your-tes-endpoint:5034",
     minio_sts_endpoint="http://your-minio-endpoint:9000/sts",
@@ -109,7 +109,7 @@ wb.validate(
     minio_output_bucket="your-output-bucket-name",
     tres=["Your-TRE1"],
     
-    # --- Auth Params ---
+    # --- Auth parameters ---
     client_id="your-client-id",
     client_secret="your-client-secret",
     username="your-username",
@@ -120,7 +120,7 @@ wb.validate(
 
 <br>
 
-- **Parsing the Configuration params and Access Token**
+- **Parsing the Configuration parameters and Access Token**
 
 You can login to the submission layer [`https://5s-tes.federated-research.com/`](https://5s-tes.federated-research.com/) and authenticate yourself using keycloak credentials to get the api access token. 
 
@@ -128,7 +128,7 @@ Copy the access token and pass it into the `access_token` parameter.
 
 ```bash
 wb.validate(
-		# --- Config Params ---
+		# --- Config parameters ---
     project="your-project-name",
     tes_base_url="http://your-tes-endpoint:5034",
     minio_sts_endpoint="http://your-minio-endpoint:9000/sts",
@@ -136,16 +136,16 @@ wb.validate(
     minio_output_bucket="your-output-bucket-name",
     tres=["Your-TRE1"],
     
-    # --- Auth Params ---
+    # --- Auth parameters ---
     access_token="your-access-token"
 )
 ```
 
 #### Option B - **YAML Config File**
 
-Instead of passing the params directly as a keyword, you can create a .yaml file (which holds the Credentials and Authentication Params) and pass the path as a parameter within the validate. An example .yaml can be found here [[example-config.yml](example-config.yml)].
+Instead of passing the parameters directly as a keyword, you can create a .yaml file (which holds the Credentials and Authentication parameters) and pass the path as a parameter within the validate. An example .yaml can be found here [[example-config.yml](example-config.yml)].
 
-The workbench will extract the params from the yaml file and validate your credentials. 
+The workbench will extract the parameters from the yaml file and validate your credentials. 
 
 ```bash
 wb.validate(config_path="path/to/your-config.yml")
@@ -282,7 +282,7 @@ A fully user-defined task. `name`, `image`, and `command` are required. All 
 
 All the parameters in the custom method can be overridden within the template. 
 
-For more information about constructing a custom TES message, view [[the official schema of TES from GA4GH](https://ga4gh.github.io/task-execution-schemas/docs/#tag/TaskService/operation/CreateTask)].
+For more information about constructing a custom TES message, view [the official schema of TES from GA4GH](https://ga4gh.github.io/task-execution-schemas/docs/#tag/TaskService/operation/CreateTask).
 
 **Example Implementation**
 
@@ -335,7 +335,7 @@ output/
 
 #### Fetch Results - wb.fetch_outputs()
 
-The `wb.fetch_output()` method will pool results from the TRE for the submissions made in the previous steps. This method works based on the parameters defined (see params table below).
+The `wb.fetch_output()` method will pool results from the TRE for the submissions made in the previous steps. This method works based on the parameters defined (see parameters table below).
 
 | Parameter | Required | Description |
 | --- | --- | --- |
