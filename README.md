@@ -429,7 +429,7 @@ INFO | Child task info: 945, status: Completed
 INFO | Fetching token from keycloak...
 INFO | Keycloak token fetched successfully
 INFO | Exchanging bearer token for MinIO credentials via STS
-INFO | MinIO client initialised
+INFO | MinIO client initialized
 INFO | Found 2 result object(s) for task 945
 INFO | Downloading result object: 945/acro_output_20260501_085731.zip
 INFO | Downloaded -> output/Nottingham TRE 01/945/acro_output_20260501_085731.zip
