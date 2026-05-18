@@ -48,7 +48,7 @@ def list_results(
     Parameters
     ----------
     - task_id: ID returned by the TES submission.
-    - client: MinIO client (should be already initialised before calling this function).
+    - client: MinIO client (should be already initialized before calling this function).
     - config: ConfigValidationModel (should be already validated before calling this function).
 
     Returns

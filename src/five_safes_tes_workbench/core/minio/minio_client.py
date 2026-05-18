@@ -55,7 +55,7 @@ class MinioClientBuilder:
         )
         self._config = config
         logger.info(
-            "MinIO client initialised (endpoint=%s, secure=%s)",
+            "MinIO client initialized (endpoint=%s, secure=%s)",
             config.minio_endpoint,
             secure,
         )

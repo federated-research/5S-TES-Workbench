@@ -24,7 +24,7 @@ def fetch_keycloak_token(auth: AuthValidationModel) -> str:
         f"/realms/Dare-Control/protocol/openid-connect/token"
     )
 
-    logger.info("Requesting keycloak token from %s", url)
+    logger.info("Requesting Keycloak token from %s", url)
 
     response = requests.post(
         url,
@@ -65,5 +65,5 @@ def resolve_bearer(auth: AuthValidationModel) -> str:
         logger.info("Using provided access token")
         return auth.access_token
 
-    logger.info("Fetching token from keycloak...")
+    logger.info("Fetching token from Keycloak...")
     return fetch_keycloak_token(auth)

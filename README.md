@@ -19,20 +19,55 @@ Before using the Workbench, ensure you have the following:
 - **Python 3.13+** installed
 - **`five-safes-tes-workbench`** package installed in your environment:
     
+     If you are using `pip`:
     ```bash
     pip install five-safes-tes-workbench
+    ```
+
+    If you are using `uv`:
+    ```bash
+    uv pip install five-safes-tes-workbench
     ```
     
 - Access to a running **TES endpoint**
 - Access to a **MinIO** instance with an output bucket configured
 - Valid **authentication credentials**, which are either a pre-obtained access token from Submission Layer UI or Submission API's Keycloak credentials provided by Submission layer's administrator
 
-## Initialize the Workbench
 
-The first step will be importing the workbench from the pip package as follows and initialize the client.
+## Quickstart
+The fastest way to run an end-to-end submission. This assumes you already have a `config.yml` — see [Option B — YAML Config File](#option-b---yaml-config-file) for the format.
+
 
 ```
 from five_safes_tes_workbench.workbench import Workbench
+
+wb = Workbench()
+
+wb.validate(config_path="config.yml")
+wb.build_tes.hello_world()
+wb.submit()
+wb.fetch_outputs()
+```
+
+Each step is covered in detail in the sections below. For a working notebook with all templates, see the example implementation below.
+
+## Workflow state
+
+The Workbench instance stores:
+- validated configuration
+- authentication state
+- the most recently built TES payload
+- the most recent submitted task ID
+
+Because of this, methods such as `submit()` and `fetch_outputs()` may depend on earlier calls made in the same Python session.
+
+
+## Initialize the Workbench
+
+First, import the Workbench class and initialize a client.
+
+```
+from five_safes_tes_workbench import Workbench
 
 wb = Workbench()
 ```
@@ -67,7 +102,12 @@ The required parameters are structured into two types.
 
 The authentication parameters are required to authenticate via ID Provider (Keycloak) and fetch the access token.
 
+Authentication precedence:
 You can either provide Keycloak Credentials or Access Key.
+
+- If `access_token` is provided, it is used directly.
+- Otherwise, use `Keycloak credentials` and ignore `access_token` as the Workbench attempts to obtain an access token using the supplied `Keycloak credentials`.
+- If neither is supplied, validation fails.
 
 **Keycloak Credentials**
 
@@ -93,7 +133,7 @@ The next step is to validate the user using the required parameters. There are t
 
 #### Option A - Direct Parameters
 
-Parse the parameters directly as a keyword arguments. There are two further ways to do it. 
+Parse the parameters directly as keyword arguments. There are two further ways to do it. 
 
 <br>
 
@@ -169,20 +209,20 @@ config:
     - "Add more TREs as needed"
 
 
-  auth:
-    # ---- Option 1: Access Token ----
-    # (Use Access Token if you have one from the Submission UI.)
+auth:
+  # ---- Option 1: Access Token ----
+  # (Use Access Token if you have one from the Submission UI.)
 
-    access_token: "your-access-token-here"
+  access_token: "your-access-token-here"
 
-    # ---- Option 2: Keycloak Credentials ----
-    # (Use Keycloak credentials if you want the Workbench to obtain an access token on your behalf.)
+  # ---- Option 2: Keycloak Credentials ----
+  # (Use Keycloak credentials if you want the Workbench to obtain an access token on your behalf.)
 
-    client_id: "your-keycloak-client-id"
-    client_secret: "your-keycloak-client-secret"
-    username: "your-keycloak-username"
-    password: "your-keycloak-password"
-    keycloak_url: "http://localhost:your-keycloak-port/"
+  client_id: "your-keycloak-client-id"
+  client_secret: "your-keycloak-client-secret"
+  username: "your-keycloak-username"
+  password: "your-keycloak-password"
+  keycloak_url: "http://localhost:your-keycloak-port/"
 ```
 
 
@@ -335,13 +375,13 @@ output/
 
 #### Fetch Results - wb.fetch_outputs()
 
-The `wb.fetch_output()` method will pool results from the TRE for the submissions made in the previous steps. This method works based on the parameters defined (see parameters table below).
+The `wb.fetch_outputs()` method retrieve results from the TRE for the submissions made in the previous steps. This method works based on the parameters defined (see params table below).
 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `tre` | No | TRE name to fetch results for. If omitted, Workbench will attempt to download results for **all TREs** in configs |
 | `task_id` | No | Integer task ID. Defaults to the Task ID from the most recent `wb.submit()` call |
-| `output_dir` | No | Local directory to write the downloaded files into. The directory (and any missing parents) is created automatically. Defaulted to the directory next to the notebook. |
+| `output_dir` | No | Local directory to write the downloaded files into. The directory (and any missing parents) is created automatically. Defaults to a directory created next to the notebook. |
 
 - If `task_id` is not provided, the Workbench will automatically use the ID from the most recent `wb.submit()` call in the current session. 
 
@@ -389,7 +429,7 @@ INFO | Child task info: 945, status: Completed
 INFO | Fetching token from keycloak...
 INFO | Keycloak token fetched successfully
 INFO | Exchanging bearer token for MinIO credentials via STS
-INFO | MinIO client initialised
+INFO | MinIO client initialized
 INFO | Found 2 result object(s) for task 945
 INFO | Downloading result object: 945/acro_output_20260501_085731.zip
 INFO | Downloaded -> output/Nottingham TRE 01/945/acro_output_20260501_085731.zip

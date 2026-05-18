@@ -37,6 +37,7 @@ def get_child_task_info(
     )
     response = requests.get(
         child_info_url,
+        timeout=60,
     )
     response.raise_for_status()
 
@@ -75,7 +76,7 @@ def is_child_task_completed(child_task_info: ChildTaskInfo) -> bool:
         or child_task_info.status == TaskStatus.FAILURE
     ):
         logger.warning(
-            "Child task %s is failed, cancelled or data out approval rejected."
+            "Child task %s has failed, been cancelled or had data out approval rejected. "
             "Please try again later.",
             child_task_info.id,
         )
@@ -83,7 +84,7 @@ def is_child_task_completed(child_task_info: ChildTaskInfo) -> bool:
 
     elif child_task_info.status != TaskStatus.COMPLETED:
         logger.warning(
-            "Child task %s is not completed or failed, so results are not available yet."
+            "Child task %s has not yet completed, so results are not available. "
             "Current status: %s",
             child_task_info.id,
             TASK_STATUS_DESCRIPTIONS[TaskStatus(child_task_info.status)],
