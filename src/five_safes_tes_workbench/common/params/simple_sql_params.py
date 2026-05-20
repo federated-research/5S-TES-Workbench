@@ -21,3 +21,5 @@ class SimpleSQLUserParams(TypedDict):
     description: NotRequired[str]
     output_url: NotRequired[str]
     output_path: NotRequired[str]
+    output_format: NotRequired[str]
+    analysis: NotRequired[str]
