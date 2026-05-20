@@ -30,16 +30,30 @@ class SimpleSQLTemplate(BaseTESTemplate[SimpleSQLUserParams]):
         The user's SQL query is injected into the command list.
         """
 
+        # ---- Available Docker images for this template ----
+
+        _DEFAULT_IMAGE = "harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0"  # noqa: E501
+        _UON_ANALYSIS_IMAGE = "ghcr.io/health-informatics-uon/five-safes-tes-analytics-dev:sha-dbf029b" # noqa: E501
+
         # ---- Fixed parameters for this template ----
 
-        _IMAGE = "harbor.federated-analytics.ac.uk/5s-tes-analysis-tools/5s-tes-analysis-tools-tre-sqlpg:1.0.0"  # noqa: E501
         _DESCRIPTION = overrides.get("description", "Simple SQL Task")
         _OUTPUT_PATH = overrides.get("output_path", "/outputs")
         _OUTPUT_URL = overrides.get("output_url", "s3://")
+        _OUTPUT_FORMAT = overrides.get("output_format")
+        _ANALYSIS = overrides.get("analysis")
         _COMMAND = [
             f"--Output={_OUTPUT_PATH}/output.csv",
             f"--Query={overrides['query']}",
         ]
+
+        if _OUTPUT_FORMAT:
+            _COMMAND.append(f"--output-format={_OUTPUT_FORMAT}")
+        if _ANALYSIS:
+            _COMMAND.append(f"--analysis={_ANALYSIS}")
+
+
+        _IMAGE = _DEFAULT_IMAGE if not _ANALYSIS else _UON_ANALYSIS_IMAGE
 
         return TESTaskParams(
             name=overrides["name"],
