@@ -2,6 +2,7 @@ from typing import Any
 
 from ..base.tes_template_abc import BaseTESTemplate
 from .base_registry import BaseTemplateRegistry
+from .templates.analysis import AnalysisTemplate
 from .templates.bunny import BunnyTemplate
 from .templates.custom import CustomTemplate
 from .templates.hello_world import HelloWorldTemplate
@@ -26,6 +27,7 @@ _DEFAULT_TEMPLATES: list[type[BaseTESTemplate[Any]]] = [
     CustomTemplate,
     SimpleSQLTemplate,
     BunnyTemplate,
+    AnalysisTemplate,
     # --- Add new templates above ---
 ]
 
