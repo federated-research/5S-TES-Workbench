@@ -1,0 +1,71 @@
+name: build_sphinx_docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies (uv)
+      run: |
+        uv sync
+
+    - name: Remove old .rst files (keep index)
+      run: |
+        find docs/source -type f -name "*.rst" ! -name "index.rst" -delete
+
+    - name: Generate .rst files from package
+      run: |
+        uv run sphinx-apidoc -o docs/source/ docs/source src/five_safes_tes_workbench
+
+    - name: Build Sphinx HTML documentation
+      run: |
+        uv run sphinx-build -b html docs/source docs/build/html
+
+    - name: Upload documentation artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sphinx-html
+        path: docs/build/html
+
+    # ===============================
+    # Deploy to GitHub Pages
+    # ===============================
+    - name: Deploy to gh-pages
+      run: |
+        git clone https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git \
+          --branch gh-pages --single-branch gh-pages
+
+        cd gh-pages
+
+        git rm -rf . || true
+
+        cp -r ../docs/build/html/* .
+
+        touch .nojekyll
+
+        git config user.email "action@github.com"
+        git config user.name "GitHub Action"
+
+        git add .
+
+        git commit -m "Update documentation" || true
+
+        git push origin gh-pages
