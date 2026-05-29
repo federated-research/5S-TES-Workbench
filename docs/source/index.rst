@@ -6,9 +6,7 @@
 five-safes-TES-workbench documentation
 ======================================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+This page is the API reference for the Five Safes TES Workbench. The aim of the workbench is to make it easier and simpler to use Five Safes TES, in particular by providing functions to simplify building TES messages, sending messages to the Five Safes TES submission layer, and retrieving results.
 
 
 .. toctree::
