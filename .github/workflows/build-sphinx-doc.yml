@@ -3,7 +3,7 @@ name: build_sphinx_docs
 on:
   push:
     branches:
-      - API-reference-github-action
+      - main
 
 jobs:
   build_docs:
