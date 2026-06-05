@@ -240,6 +240,7 @@ The Workbench provides a template-based interface via `wb.build_tes.<template>(
 | Simple SQL | build_tes.simple_sql(...) | Run a SQL query against a TRE database |
 | Bunny | build_tes.bunny(...) | Run the Health Informatics Bunny CLI analytics tool |
 | Custom | build_tes.custom(...) | Bring your own container image and command |
+| Analysis | build_tes.analysis(...) | Run predefined analysis against a TRE database |
 
 
 #### Hello World - wb.build_tes.hello_world( )
@@ -351,6 +352,44 @@ wb.build_tes.custom(
 
 wb.submit()
 ```
+
+#### Analysis - wb.build_tes.analysis( )
+
+Runs Health Informatics Analysis container with a pre-defined analysis types. The container image is fixed by the template: 
+`"ghcr.io/health-informatics-uon/five-safes-tes-analytics-dev:sha-dbf029b"`
+
+The required parameters to run the analysis are `name`, `query` and `analysis_type`.
+
+| Parameter | Description |
+| name | Task name |
+| query | SQL query to execute |
+| analysis_type | Type of analysis to run over a query |
+
+**The workbench's analysis type supports multiple analysis types as follows:**
+
+- `mean`:  Calculates the arithmetic mean of a numeric column. The query must select a single numeric column. Returns `n` (count) and `total` (sum of values).
+
+- `variance`:  Calculates the sample variance of a numeric column. The query must select a single numeric column. Returns `n` (count), `sum_x2` (sum of squares), and `total` (sum of values).
+
+- `PMCC`: Calculates Pearson's correlation coefficient between two numeric columns. The query must select exactly two numeric columns aliased as `x` and `y`. Returns `n`, `sum_x`, `sum_y`, `sum_xy`, `sum_x2`, and `sum_y2`.
+
+- `contingency_table`: Builds a frequency table for one or more categorical columns. The query must select one or more categorical columns. Returns grouped counts by category combination.
+
+- `percentile_sketch`: Calculates an approximate distribution using the TDigest algorithm. The query must select a single numeric column. Returns a TDigest sketch dictionary containing `centroids` and `n`.
+
+**Example Implementation**
+
+```bash
+
+_query = "SELECT value_as_number FROM \"NottinghamDemo\".measurement \nWHERE measurement_concept_id = 43055141\nAND value_as_number IS NOT NULL"
+
+wb.build_tes.analysis(
+    name="Analysis Template testing from Workbench",
+    query=_query,
+    analysis_type="mean",
+)
+```
+
 
 ### **Collect Results**
 
