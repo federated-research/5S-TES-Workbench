@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - API-docs-bugfix
 
 jobs:
   build_docs:
@@ -32,8 +33,8 @@ jobs:
 
     - name: Generate .rst files from package
       run: |
-        uv run sphinx-apidoc -o docs/source/ docs/source src/five_safes_tes_workbench
-
+        uv run sphinx-apidoc -o docs/source/ src/five_safes_tes_workbench
+    
     - name: Build Sphinx HTML documentation
       run: |
         uv run sphinx-build -b html docs/source docs/build/html
@@ -45,7 +46,7 @@ jobs:
         path: docs/build/html
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
     needs: build_docs
     runs-on: ubuntu-latest
     environment:
