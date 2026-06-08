@@ -379,7 +379,7 @@ The required parameters to run the analysis are `name`, `query` and `analysis_ty
 
 **Example Implementation**
 
-```bash
+```python
 
 _query = "SELECT value_as_number FROM \"NottinghamDemo\".measurement \nWHERE measurement_concept_id = 43055141\nAND value_as_number IS NOT NULL"
 
