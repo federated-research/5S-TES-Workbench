@@ -8,6 +8,16 @@ logger = get_logger(__name__)
 
 
 def _fetch_keycloak_token_response(auth: AuthValidationModel) -> dict[str, str]:
+    """
+    Fetch a token JSON response from Keycloak using the provided credentials.
+
+    Attributes:
+    - auth: The authentication details containing
+      Keycloak credentials.
+
+    Returns:
+    - A dictionary containing the access token and id token.
+    """
     url = (
         f"{auth.keycloak_url.rstrip('/')}"  # type: ignore[union-attr]
         f"/realms/Dare-Control/protocol/openid-connect/token"
@@ -35,7 +45,7 @@ def _fetch_keycloak_token_response(auth: AuthValidationModel) -> dict[str, str]:
     return response.json()
 
 
-def fetch_keycloak_token(auth: AuthValidationModel) -> str:
+def fetch_keycloak_access_token(auth: AuthValidationModel) -> str:
     """
     Helper method to fetch a new access token from
     Keycloak using the provided credentials.
@@ -88,7 +98,7 @@ def resolve_bearer(auth: AuthValidationModel) -> str:
         return auth.access_token
 
     logger.info("Fetching token from Keycloak...")
-    return fetch_keycloak_token(auth)
+    return fetch_keycloak_access_token(auth)
 
 
 def resolve_sts_bearer(auth: AuthValidationModel) -> str:
