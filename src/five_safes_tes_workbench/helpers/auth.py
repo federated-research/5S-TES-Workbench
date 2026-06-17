@@ -55,7 +55,7 @@ def fetch_keycloak_id_token(auth: AuthValidationModel) -> str:
     Fetch an OIDC ID token from Keycloak for STS web identity exchange.
 
     RustFS validates ``AssumeRoleWithWebIdentity`` tokens as OIDC identity
-    tokens, while the TES submission API still uses access tokens.
+    tokens.
     """
     token_response = _fetch_keycloak_token_response(auth)
     id_token = token_response.get("id_token")
