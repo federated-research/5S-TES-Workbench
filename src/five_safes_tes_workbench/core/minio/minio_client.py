@@ -4,12 +4,12 @@ from pathlib import Path
 
 from minio import Minio
 
-from ...helpers.auth import resolve_bearer
+from ...helpers.auth import resolve_sts_bearer
 from ...helpers.minio import (
     download_result,
-    exchange_minio_token,
     list_results,
 )
+from ...helpers.token import exchange_s3_token
 from ...helpers.url import is_https, strip_scheme
 from ...schema.auth_schema import AuthValidationModel
 from ...schema.config_schema import ConfigValidationModel
@@ -27,9 +27,7 @@ class MinioClientBuilder:
     configured STS endpoint (AssumeRoleWithWebIdentity).
     """
 
-    def __init__(
-        self, config: ConfigValidationModel, auth: AuthValidationModel
-    ) -> None:
+    def __init__(self, config: ConfigValidationModel, auth: AuthValidationModel) -> None:
         """
         Exchange the bearer token for temporary MinIO credentials via STS
         and create an authenticated Minio client.
@@ -41,8 +39,8 @@ class MinioClientBuilder:
         - auth: Validated authentication details used to obtain the bearer
           token.
         """
-        bearer = resolve_bearer(auth)
-        credentials = exchange_minio_token(bearer, config.minio_sts_endpoint)
+        bearer = resolve_sts_bearer(auth)
+        credentials = exchange_s3_token(bearer, config.minio_sts_endpoint)
         secure = is_https(config.minio_endpoint)
         # Minio() only accepts host:port — strip any http(s):// prefix.
         endpoint = strip_scheme(config.minio_endpoint)

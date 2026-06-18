@@ -3,7 +3,7 @@ import tes  # type: ignore
 
 from ...common.enums.validator_enums import AuthMode
 from ...common.exceptions.submission_errors import SubmissionError
-from ...helpers.auth import fetch_keycloak_token, resolve_bearer
+from ...helpers.auth import fetch_keycloak_access_token, resolve_bearer
 from ...schema.auth_schema import AuthValidationModel
 from ...schema.config_schema import ConfigValidationModel
 from ...utils.logger import get_logger
@@ -53,8 +53,8 @@ class WorkbenchSubmit:
             response = self._post_task(endpoint, _task_json, bearer)
 
             if response.status_code == 401 and auth.auth_mode == AuthMode.CREDENTIALS:
-                logger.info("Received 401, retrying with fresh keycloak token...")
-                bearer = fetch_keycloak_token(auth)
+                logger.info("Received 401, retrying with fresh keycloak access token...")
+                bearer = fetch_keycloak_access_token(auth)
                 response = self._post_task(endpoint, _task_json, bearer)
 
             response.raise_for_status()

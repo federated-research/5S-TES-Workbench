@@ -379,15 +379,13 @@ wheels = [
 
 [[package]]
 name = "five-safes-tes-workbench"
-version = "0.2.5"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
-    { name = "furo" },
     { name = "minio" },
     { name = "py-tes" },
     { name = "pydantic" },
     { name = "pyyaml" },
-    { name = "sphinx" },
     { name = "types-requests" },
 ]
 
@@ -399,15 +397,17 @@ dev = [
     { name = "ruff" },
     { name = "types-pyyaml" },
 ]
+docs = [
+    { name = "furo" },
+    { name = "sphinx" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "furo", specifier = ">=2025.12.19" },
     { name = "minio", specifier = ">=7.2.20" },
     { name = "py-tes", specifier = ">=1.1.2" },
     { name = "pydantic", specifier = ">=2.13.1" },
     { name = "pyyaml", specifier = ">=6.0.3" },
-    { name = "sphinx", specifier = ">=9.1.0" },
     { name = "types-requests", specifier = ">=2.33.0.20260408" },
 ]
 
@@ -418,6 +418,10 @@ dev = [
     { name = "pytest-mock", specifier = ">=3.14.0" },
     { name = "ruff", specifier = ">=0.15.11" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20260408" },
+]
+docs = [
+    { name = "furo", specifier = ">=2025.12.19" },
+    { name = "sphinx", specifier = ">=9.1.0" },
 ]
 
 [[package]]

@@ -1,20 +1,16 @@
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 
 import minio
-import requests
 from minio import Minio
 
-from ..constants.minio import (
-    STS_DURATION_SECONDS,
-    STS_NAMESPACE,
-    STS_TOKEN_EXCHANGE_TIMEOUT,
-)
 from ..schema.config_schema import ConfigValidationModel
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+STS_ACTION = "AssumeRoleWithWebIdentity"
+STS_VERSION = "2011-06-15"
 
 
 @dataclass
@@ -115,69 +111,3 @@ def download_result(
         raise
 
     return local_path
-
-
-def _parse_sts_response(response: requests.Response) -> MinioCredentials:
-    """
-    Parse and validate the STS response and return the credentials.
-
-    Parameters
-    ----------
-    - response: The response from the STS endpoint.
-
-    Returns
-    -------
-    A MinioCredentials object.
-    """
-    try:
-        root = ET.fromstring(response.text)
-    except ET.ParseError as exc:
-        raise RuntimeError(
-            f"STS response is not valid XML (status {response.status_code}). "
-            f"Raw response:\n{response.text!r}"
-        ) from exc
-
-    credentials = root.find(".//sts:Credentials", STS_NAMESPACE)
-
-    if credentials is None:
-        raise RuntimeError("STS response contained no Credentials element")
-
-    access_key = credentials.findtext("sts:AccessKeyId", namespaces=STS_NAMESPACE)
-    secret_key = credentials.findtext("sts:SecretAccessKey", namespaces=STS_NAMESPACE)
-    session_token = credentials.findtext("sts:SessionToken", namespaces=STS_NAMESPACE)
-
-    if access_key is None or secret_key is None or session_token is None:
-        raise RuntimeError("STS response did not contain all required credentials")
-
-    return MinioCredentials(
-        access_key=access_key, secret_key=secret_key, session_token=session_token
-    )
-
-
-def exchange_minio_token(bearer: str, sts_endpoint: str) -> MinioCredentials:
-    """
-    Call the STS AssumeRoleWithWebIdentity action and return temporary
-    AWS-style credentials.
-    """
-    logger.info(
-        "Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint
-    )
-
-    response = requests.post(
-        sts_endpoint,
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        data={
-            "Action": "AssumeRoleWithWebIdentity",
-            "Version": "2011-06-15",
-            "DurationSeconds": STS_DURATION_SECONDS,
-            "WebIdentityToken": bearer,
-        },
-        timeout=STS_TOKEN_EXCHANGE_TIMEOUT,
-    )
-
-    if response.status_code != 200:
-        raise RuntimeError(
-            f"STS token exchange failed ({response.status_code}): {response.text}"
-        )
-
-    return _parse_sts_response(response)
