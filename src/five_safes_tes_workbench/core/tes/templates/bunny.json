@@ -1,0 +1,38 @@
+{
+         "name": "Bunny Distribution Query",
+         "inputs": null,
+         "outputs": [
+                  {
+                           "name": "Query Results",
+                           "description": "Results from the requested query execution",
+                           "url": "s3://",
+                           "path": "/outputs",
+                           "type": "DIRECTORY"
+                  }
+         ],
+         "resources": null,
+         "executors": [
+                  {
+                           "image": "ghcr.io/health-informatics-uon/five-safes-tes-analytics-bunny-cli:1.6.0",
+                           "command": [
+                                    "--body-json",
+                                    "{\"code\":\"GENERIC\",\"analysis\":\"DISTRIBUTION\",\"uuid\":\"123\",\"collection\":\"test\",\"owner\":\"me\"}",
+                                    "--output",
+                                    "/outputs/output.json",
+                                    "--no-encode"
+                           ],
+                           "workdir": null,
+                           "stdin": null,
+                           "stdout": null,
+                           "stderr": null,
+                           "env": {}
+                  }
+         ],
+         "volumes": null,
+         "tags": {
+                  "Project": "NottinghamDemo",
+                  "tres": "Nottingham TRE 01|Nottingham TRE 02"
+         },
+         "logs": null,
+         "creation_time": null
+}

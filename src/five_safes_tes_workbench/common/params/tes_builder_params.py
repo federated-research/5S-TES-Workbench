@@ -1,44 +1,46 @@
-from typing import NotRequired, Required, TypedDict
+from typing import Literal
+
+from pydantic import BaseModel
 
 
-class InputTESParams(TypedDict):
-    name: NotRequired[str | None]
-    description: NotRequired[str | None]
-    url: NotRequired[str | None]
-    path: Required[str]
-    type: NotRequired[str]
-    content: NotRequired[str | None]
-    streamable: NotRequired[bool | None]
+class InputTESParams(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    url: str | None = None
+    path: str
+    type: Literal["FILE", "DIRECTORY"] | None = None
+    content: str | None = None
+    streamable: bool | None = None
 
 
-class OutputTESParams(TypedDict):
-    name: NotRequired[str]
-    description: NotRequired[str]
-    type: NotRequired[str]
-    url: Required[str]
-    path: Required[str]
-    path_prefix: NotRequired[str | None]
+class OutputTESParams(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    url: str
+    path: str
+    type: Literal["FILE", "DIRECTORY"] | None = None
+    path_prefix: str | None = None
 
 
-class ExecutorTESParams(TypedDict):
-    image: Required[str]
-    command: Required[list[str]]
-    workdir: NotRequired[str | None]
-    stdin: NotRequired[str | None]
-    stdout: NotRequired[str | None]
-    stderr: NotRequired[str | None]
-    env: NotRequired[dict[str, str] | None]
-    ignore_error: NotRequired[bool | None]
+class ExecutorTESParams(BaseModel):
+    image: str
+    command: list[str]
+    workdir: str | None = None
+    stdin: str | None = None
+    stdout: str | None = None
+    stderr: str | None = None
+    env: dict[str, str] | None = None
+    ignore_error: bool | None = None
 
 
-class TESTaskParams(TypedDict):
+class TESTaskParams(BaseModel):
     """
     Parameters for building a TES task
     """
 
-    name: Required[str]
-    executors: Required[list[ExecutorTESParams]]
-    description: NotRequired[str]
-    inputs: NotRequired[list[InputTESParams] | None]
-    outputs: NotRequired[list[OutputTESParams] | None]
-    volumes: NotRequired[list[str] | None]
+    name: str
+    executors: list[ExecutorTESParams]
+    description: str | None = None
+    inputs: list[InputTESParams] | None = None
+    outputs: list[OutputTESParams] | None = None
+    volumes: list[str] | None = None
