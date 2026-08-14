@@ -20,6 +20,8 @@ auth:
   # (Use Access Token if you have one from the Submission UI.)
 
   access_token: "your-access-token-here"
+  # Optional. OIDC ID token for STS result retrieval; falls back to access_token if omitted.
+  # id_token: "your-id-token-here"
 
   # ---- Option 2: Keycloak Credentials ----
   # (Use Keycloak credentials if you want the Workbench to obtain an access token on your behalf.)
@@ -29,3 +31,6 @@ auth:
   username: "your-keycloak-username"
   password: "your-keycloak-password"
   keycloak_url: "http://localhost:your-keycloak-port/"
+  # Optional. OIDC ID token for STS result retrieval. Omit to fetch from Keycloak
+  # automatically when using credentials (requires openid scope).
+  # id_token: "your-id-token-here"

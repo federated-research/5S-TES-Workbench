@@ -32,6 +32,7 @@ class AuthParamEnums(str, Enum):
     """
 
     ACCESS_TOKEN = "access_token"   # nosec B105
+    ID_TOKEN = "id_token"  # nosec B105
     CLIENT_ID = "client_id"
     CLIENT_SECRET = "client_secret"  # nosec B105
     KEYCLOAK_URL = "keycloak_url"

@@ -29,6 +29,7 @@ class ConfigValidationParams(TypedDict, total=False):
     # --- Auth parameters ---
 
     access_token: str
+    id_token: str
     client_id: str
     client_secret: str
     keycloak_url: str

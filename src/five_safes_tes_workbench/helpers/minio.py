@@ -154,13 +154,13 @@ def _parse_sts_response(response: requests.Response) -> MinioCredentials:
     )
 
 
-def exchange_minio_token(bearer: str, sts_endpoint: str) -> MinioCredentials:
+def exchange_minio_token(web_identity_token: str, sts_endpoint: str) -> MinioCredentials:
     """
     Call the STS AssumeRoleWithWebIdentity action and return temporary
     AWS-style credentials.
     """
     logger.info(
-        "Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint
+        "Exchanging ID token for object-storage credentials via STS (%s)", sts_endpoint
     )
 
     response = requests.post(
@@ -170,7 +170,7 @@ def exchange_minio_token(bearer: str, sts_endpoint: str) -> MinioCredentials:
             "Action": "AssumeRoleWithWebIdentity",
             "Version": "2011-06-15",
             "DurationSeconds": STS_DURATION_SECONDS,
-            "WebIdentityToken": bearer,
+            "WebIdentityToken": web_identity_token,
         },
         timeout=STS_TOKEN_EXCHANGE_TIMEOUT,
     )

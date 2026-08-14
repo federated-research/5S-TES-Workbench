@@ -17,19 +17,17 @@ class AuthValidationModel(BaseModel):
     - auth_mode: The authentication mode (ACCESS_TOKEN or CREDENTIALS).
 
     For ACCESS_TOKEN mode:
-        - access_token: The access token for authentication.
+        - access_token: The access token for TES submission.
+        - id_token: Optional OIDC ID token for object-storage STS retrieval.
 
     For CREDENTIALS mode:
-        - client_id: The Keycloak client
-          ID for submission.
-        - client_secret: The Keycloak client
-          secret for submission.
-        - keycloak_url: The Keycloak URL
-          for submission.
-        - username: The Keycloak username
-          for submission.
-        - password: The Keycloak password
-          for submission.
+        - client_id: The Keycloak client ID.
+        - client_secret: The Keycloak client secret.
+        - keycloak_url: The Keycloak URL.
+        - username: The Keycloak username.
+        - password: The Keycloak password.
+        - id_token: Optional OIDC ID token for STS retrieval. When omitted,
+          an id_token is fetched from Keycloak at retrieval time.
     """
 
     model_config = {"frozen": True}
@@ -37,6 +35,7 @@ class AuthValidationModel(BaseModel):
     auth_mode: AuthMode = AuthMode.CREDENTIALS
 
     access_token: str | None = None
+    id_token: str | None = None
 
     client_id: str | None = None
     client_secret: str | None = None
@@ -47,9 +46,10 @@ class AuthValidationModel(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def resolve_auth(cls, values: dict[str, object]) -> dict[str, object]:
-        token: object = values.get("access_token")
-        if isinstance(token, str):
-            values["access_token"] = token.strip()
+        for field in ("access_token", "id_token"):
+            token: object = values.get(field)
+            if isinstance(token, str):
+                values[field] = token.strip()
 
         if values.get("access_token"):
             values["auth_mode"] = AuthMode.ACCESS_TOKEN
@@ -65,18 +65,19 @@ class AuthValidationModel(BaseModel):
         else:
             self._validate_credentials()
 
+        self._validate_id_token_if_present()
         return self
 
     def _validate_access_token(self) -> None:
-        errors = []
         if not self.access_token:
-            errors.append("Access token must not be empty for ACCESS_TOKEN auth mode.")
-        if errors:
-            raise AuthValidationError(errors)
+            raise AuthValidationError(
+                ["Access token must not be empty for ACCESS_TOKEN auth mode."]
+            )
 
     def _validate_credentials(self) -> None:
+        optional_fields = {AuthParamEnums.ACCESS_TOKEN, AuthParamEnums.ID_TOKEN}
         credential_fields = [
-            e.value for e in AuthParamEnums if e != AuthParamEnums.ACCESS_TOKEN
+            e.value for e in AuthParamEnums if e not in optional_fields
         ]
         missing = [
             field
@@ -87,3 +88,7 @@ class AuthValidationModel(BaseModel):
             raise AuthValidationError(
                 [f"Missing required field: {field}" for field in missing]
             )
+
+    def _validate_id_token_if_present(self) -> None:
+        if self.id_token is not None and not self.id_token.strip():
+            raise AuthValidationError(["id_token must not be empty when provided."])

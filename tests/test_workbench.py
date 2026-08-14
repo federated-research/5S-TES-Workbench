@@ -12,6 +12,7 @@ VALID_KWARGS = {
     "minio_output_bucket": "output-bucket",
     "tres": ["TRE-A"],
     "access_token": "tok-abc123",
+    "id_token": "id-tok-xyz",
 }
 
 

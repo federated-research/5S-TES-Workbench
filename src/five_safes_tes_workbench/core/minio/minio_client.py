@@ -4,7 +4,7 @@ from pathlib import Path
 
 from minio import Minio
 
-from ...helpers.auth import resolve_bearer
+from ...helpers.auth import resolve_web_identity_token
 from ...helpers.minio import (
     download_result,
     exchange_minio_token,
@@ -41,8 +41,10 @@ class MinioClientBuilder:
         - auth: Validated authentication details used to obtain the bearer
           token.
         """
-        bearer = resolve_bearer(auth)
-        credentials = exchange_minio_token(bearer, config.minio_sts_endpoint)
+        web_identity_token = resolve_web_identity_token(auth)
+        credentials = exchange_minio_token(
+            web_identity_token, config.minio_sts_endpoint
+        )
         secure = is_https(config.minio_endpoint)
         # Minio() only accepts host:port — strip any http(s):// prefix.
         endpoint = strip_scheme(config.minio_endpoint)

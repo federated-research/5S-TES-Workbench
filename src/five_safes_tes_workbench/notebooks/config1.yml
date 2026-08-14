@@ -1,0 +1,34 @@
+# ----- Five Safes TES Workbench — Example Configuration ------
+
+
+config:
+
+  # ---- Required Configuration ----
+
+  project: "NottinghamDemo"
+  tes_base_url: "https://api.5s-tes.federated-research.com"
+  minio_sts_endpoint: "https://api.s3.5s-tes.federated-research.com"
+  minio_endpoint: "https://api.s3.5s-tes.federated-research.com"
+  minio_output_bucket: "12590output"
+  tres:
+    - "Nottingham TRE 01"
+    - "Nottingham TRE 02"
+
+
+auth:
+  # ---- Option 1: Access Token ----
+  # (Use Access Token if you have one from the Submission UI.)
+
+  # access_token: "your-access-token-here"
+  # Optional. OIDC ID token for RustFS/S3 STS retrieval. Omit to fetch from Keycloak
+  # automatically when using credentials below.
+  # id_token: "your-id-token-here"
+
+  # ---- Option 2: Keycloak Credentials ----
+  # (Use Keycloak credentials if you want the Workbench to obtain an access token on your behalf.)
+
+  client_id: "Dare-Control-S3"
+  client_secret: "tBqx2MQnMI9oEG1QDKNpq3EKkPZMs7M6"
+  username: "anwarfg"
+  password: "<PASSWORD>"
+  keycloak_url: "https://drs-core-identity.azurewebsites.net"
