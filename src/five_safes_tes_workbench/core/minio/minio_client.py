@@ -4,6 +4,8 @@ from pathlib import Path
 
 from minio import Minio
 
+from five_safes_tes_workbench.helpers.project_s3_info import ProjectS3Info
+
 from ...helpers.auth import resolve_sts_bearer
 from ...helpers.minio import (
     download_result,
@@ -27,7 +29,12 @@ class MinioClientBuilder:
     configured STS endpoint (AssumeRoleWithWebIdentity).
     """
 
-    def __init__(self, config: ConfigValidationModel, auth: AuthValidationModel) -> None:
+    def __init__(
+        self,
+        config: ConfigValidationModel,
+        auth: AuthValidationModel,
+        project_s3_info: ProjectS3Info,
+    ) -> None:
         """
         Exchange the bearer token for temporary MinIO credentials via STS
         and create an authenticated Minio client.
@@ -38,12 +45,13 @@ class MinioClientBuilder:
           MinIO endpoint, output bucket).
         - auth: Validated authentication details used to obtain the bearer
           token.
+        - project_s3_info: Project S3 info for the project.
         """
         bearer = resolve_sts_bearer(auth)
-        credentials = exchange_s3_token(bearer, config.minio_sts_endpoint)
-        secure = is_https(config.minio_endpoint)
+        credentials = exchange_s3_token(bearer, project_s3_info.api_endpoint)
+        secure = is_https(project_s3_info.api_endpoint)
         # Minio() only accepts host:port — strip any http(s):// prefix.
-        endpoint = strip_scheme(config.minio_endpoint)
+        endpoint = strip_scheme(project_s3_info.api_endpoint)
         self._client = Minio(
             endpoint,
             access_key=credentials.access_key,
@@ -54,7 +62,7 @@ class MinioClientBuilder:
         self._config = config
         logger.info(
             "MinIO client initialized (endpoint=%s, secure=%s)",
-            config.minio_endpoint,
+            project_s3_info.api_endpoint,
             secure,
         )
 
@@ -62,6 +70,7 @@ class MinioClientBuilder:
         self,
         task_id: str,
         output_dir: Path,
+        bucket: str,
     ) -> list[Path]:
         """
         Download all output objects for a task to a local directory.
@@ -74,19 +83,19 @@ class MinioClientBuilder:
         - task_id: ID returned by the TES submission.
         - output_dir: Local directory to write the downloaded files into.
           The directory (and any missing parents) is created automatically.
-        - bucket: Override the bucket from config.
+        - bucket: Output bucket for the project.
 
         Returns
         -------
         List of :class:`~pathlib.Path` objects pointing to every downloaded
         file.
         """
-        object_paths = list_results(self._client, self._config, task_id)
+        object_paths = list_results(self._client, task_id, bucket)
 
         downloaded: list[Path] = []
         for path in object_paths:
             logger.info("Downloading result object: %s", path)
-            local_path = download_result(self._client, self._config, path, output_dir)
+            local_path = download_result(self._client, path, output_dir, bucket)
             downloaded.append(local_path)
 
         return downloaded
