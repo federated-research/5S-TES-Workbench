@@ -11,9 +11,6 @@ class ConfigParamEnums(str, Enum):
 
     PROJECT = "project"
     TES_BASE_URL = "tes_base_url"
-    MINIO_STS_ENDPOINT = "minio_sts_endpoint"
-    MINIO_ENDPOINT = "minio_endpoint"
-    MINIO_OUTPUT_BUCKET = "minio_output_bucket"
     TRES = "tres"
 
 
@@ -31,7 +28,7 @@ class AuthParamEnums(str, Enum):
     Maps auth configuration keys to model field names.
     """
 
-    ACCESS_TOKEN = "access_token"   # nosec B105
+    ACCESS_TOKEN = "access_token"  # nosec B105
     CLIENT_ID = "client_id"
     CLIENT_SECRET = "client_secret"  # nosec B105
     KEYCLOAK_URL = "keycloak_url"

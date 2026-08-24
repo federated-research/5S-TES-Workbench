@@ -21,9 +21,6 @@ class ConfigValidationParams(TypedDict, total=False):
 
     project: Required[str]
     tes_base_url: Required[str]
-    minio_sts_endpoint: Required[str]
-    minio_endpoint: Required[str]
-    minio_output_bucket: Required[str]
     tres: Required[list[str]]
 
     # --- Auth parameters ---

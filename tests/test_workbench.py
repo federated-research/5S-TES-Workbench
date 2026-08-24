@@ -7,9 +7,6 @@ from five_safes_tes_workbench.workbench import Workbench  # type: ignore
 VALID_KWARGS = {
     "project": "my-project",
     "tes_base_url": "https://tes.example.com",
-    "minio_sts_endpoint": "https://sts.example.com",
-    "minio_endpoint": "https://minio.example.com",
-    "minio_output_bucket": "output-bucket",
     "tres": ["TRE-A"],
     "access_token": "tok-abc123",
 }

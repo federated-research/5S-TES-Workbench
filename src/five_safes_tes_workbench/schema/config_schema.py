@@ -23,9 +23,6 @@ class ConfigValidationModel(BaseModel):
     -----------
     - project: The name of the project to validate.
     - tes_base_url: The base URL of the TES service.
-    - minio_sts_endpoint: The endpoint for MinIO STS.
-    - minio_endpoint: The endpoint for MinIO.
-    - minio_output_bucket: The name of the MinIO bucket for output.
     - tres: A list of TREs.
     """
 
@@ -33,9 +30,6 @@ class ConfigValidationModel(BaseModel):
 
     project: str
     tes_base_url: HttpUrlString
-    minio_sts_endpoint: HttpUrlString
-    minio_endpoint: HttpUrlString
-    minio_output_bucket: str
     tres: list[str]
 
     @field_validator(

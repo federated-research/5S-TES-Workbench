@@ -4,7 +4,6 @@ from pathlib import Path
 import minio
 from minio import Minio
 
-from ..schema.config_schema import ConfigValidationModel
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -32,8 +31,8 @@ class MinioCredentials:
 
 def list_results(
     client: Minio,
-    config: ConfigValidationModel,
     task_id: str,
+    bucket: str,
 ) -> list[str]:
     """
     List all output objects written by a task.
@@ -45,18 +44,17 @@ def list_results(
     ----------
     - task_id: ID returned by the TES submission.
     - client: MinIO client (should be already initialized before calling this function).
-    - config: ConfigValidationModel (should be already validated before calling this function).
+    - bucket: Output bucket for the project.
 
     Returns
     -------
     List of object names found under the task prefix.
     """
 
-    resolved_bucket = config.minio_output_bucket
     prefix = f"{task_id}/"
 
     try:
-        objects = client.list_objects(resolved_bucket, prefix=prefix, recursive=True)
+        objects = client.list_objects(bucket, prefix=prefix, recursive=True)
         names = [obj.object_name for obj in objects if obj.object_name is not None]
         if not names:
             logger.warning("No result objects found for task %s", task_id)
@@ -70,9 +68,9 @@ def list_results(
 
 def download_result(
     client: Minio,
-    config: ConfigValidationModel,
     object_path: str,
     output_dir: Path,
+    bucket: str,
 ) -> Path:
     """
     Download a single result object from MinIO to a local file.
@@ -83,7 +81,7 @@ def download_result(
     Parameters
     ----------
     - client: Authenticated MinIO client.
-    - config: Validated infrastructure configuration.
+    - bucket: Output bucket for the project.
     - object_path: Full object path within the bucket (e.g.
         ``"<task_id>/output.csv"``).
     - output_dir: Local directory to write the file into.
@@ -92,7 +90,6 @@ def download_result(
     -------
     The :class:`~pathlib.Path` of the downloaded local file.
     """
-    resolved_bucket = config.minio_output_bucket
 
     # Strip the leading <task_id>/ prefix so the filename is clean.
     parts = object_path.split("/", 1)
@@ -102,7 +99,7 @@ def download_result(
     local_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        client.fget_object(resolved_bucket, object_path, str(local_path))
+        client.fget_object(bucket, object_path, str(local_path))
         logger.info("Downloaded %s -> %s", object_path, local_path)
     except minio.error.S3Error as e:
         if e.code == "NoSuchKey":
