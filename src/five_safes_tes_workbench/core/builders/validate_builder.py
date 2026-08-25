@@ -1,6 +1,5 @@
 from typing import Unpack
 
-from ...common.enums.validator_enums import AuthMode
 from ...common.exceptions.auth_errors import AuthValidationError
 from ...common.exceptions.config_errors import ConfigValidationError
 from ...common.params.validate_params import ConfigValidationParams, split_config_params
@@ -12,7 +11,7 @@ from ...utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-class WorkbenchValidateBuilder():
+class WorkbenchValidateBuilder:
     """
     Builder class responsible for validating configuration
     and authentication parameters for the TES workbench.
@@ -39,12 +38,13 @@ class WorkbenchValidateBuilder():
         Returns the validated infrastructure configuration.
         """
         if self._config is None:
-            raise ConfigValidationError([
-                "No config information found. "
-                "Please call validate() before building the TES message."
-            ])
+            raise ConfigValidationError(
+                [
+                    "No config information found. "
+                    "Please call validate() before building the TES message."
+                ]
+            )
         return self._config
-
 
     @property
     def auth(self) -> AuthValidationModel:
@@ -52,10 +52,12 @@ class WorkbenchValidateBuilder():
         Returns the validated authentication configuration.
         """
         if self._auth is None:
-            raise AuthValidationError([
-                "No auth information found. "
-                "Please call validate() before submitting the TES message."
-            ])
+            raise AuthValidationError(
+                [
+                    "No auth information found. "
+                    "Please call validate() before submitting the TES message."
+                ]
+            )
         return self._auth
 
     def validate(
