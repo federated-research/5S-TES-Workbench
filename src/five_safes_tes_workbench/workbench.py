@@ -26,6 +26,7 @@ class Workbench:
     1. validate: Validates the configuration.
     2. build_tes: Builds the TES task.
     3. submit: Submits the TES task to the endpoint.
+    4. cancel: Cancels a submitted TES task.
     """
 
     def __init__(
@@ -101,6 +102,36 @@ class Workbench:
         )
         self._last_task_id = task_id
         return task_id
+
+    def cancel(self, task_id: int | str | None = None) -> str:
+        """
+        Cancels a submitted TES task at
+        ``{tes_base_url}/v1/tasks/{id}:cancel``.
+
+        Authentication is re-used from the earlier :meth:`validate` call.
+
+        Parameters
+        ----------
+        - task_id: ID of the task to cancel. Defaults to the ID returned
+          by the most recent :meth:`submit` call.
+
+        Returns
+        -------
+        The ID of the cancelled task.
+        """
+        resolved_id = str(task_id) if task_id is not None else self._last_task_id
+
+        if resolved_id is None:
+            raise ValueError(
+                "No Submission task ID available. Either call submit() first or pass "
+                "a task_id explicitly to cancel()."
+            )
+
+        return self._submitter.cancel(
+            config=self._validator.config,
+            auth=self._validator.auth,
+            task_id=resolved_id,
+        )
 
     # ----- MinIO Results Command -----
 
