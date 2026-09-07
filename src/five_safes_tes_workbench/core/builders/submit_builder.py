@@ -193,7 +193,7 @@ class WorkbenchSubmit:
 
         try:
             egresses = self._get_unprocessed_egresses(base_url, bearer, auth)
-            print(egresses)
+            logger.info("Fetched %d unprocessed egress(es)", len(egresses))
         except Exception as e:
             raise EgressError(f"Unexpected error while fetching unprocessed egresses: {e}") from e
 
