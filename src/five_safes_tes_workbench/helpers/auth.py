@@ -20,7 +20,7 @@ def _fetch_keycloak_token_response(auth: AuthValidationModel) -> dict[str, str]:
     """
     url = (
         f"{auth.keycloak_url.rstrip('/')}"  # type: ignore[union-attr]
-        f"/realms/Dare-Control/protocol/openid-connect/token"
+        f"/realms/Data-Egress/protocol/openid-connect/token"
     )
 
     logger.info("Requesting Keycloak token from %s", url)

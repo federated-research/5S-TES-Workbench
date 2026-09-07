@@ -28,3 +28,17 @@ class CancellationError(WorkbenchError):
         if status_code:
             full_message += f"\n  • HTTP status: {status_code}"
         super().__init__(full_message)
+
+
+class EgressError(WorkbenchError):
+    """
+    Raised when approving TES egress fails.
+    """
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        self.status_code = status_code
+
+        full_message = f"\n Egress approval failed:\n\n  • {message}"
+        if status_code:
+            full_message += f"\n  • HTTP status: {status_code}"
+        super().__init__(full_message)

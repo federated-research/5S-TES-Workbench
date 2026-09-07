@@ -27,6 +27,7 @@ class Workbench:
     2. build_tes: Builds the TES task.
     3. submit: Submits the TES task to the endpoint.
     4. cancel: Cancels a submitted TES task.
+    5. approve_egress: Approves egress for a submitted TES task.
     """
 
     def __init__(
@@ -131,6 +132,26 @@ class Workbench:
             config=self._validator.config,
             auth=self._validator.auth,
             task_id=resolved_id,
+        )
+
+    def approve_egress(self) -> list[int]:
+        """
+        Approves egress for every currently unprocessed egress.
+
+        Fetches all unprocessed egresses from
+        ``{tes_base_url}/api/DataEgress/GetAllEgresses?unprocessedonly=true``
+        and approves each one via
+        ``{tes_base_url}/api/DataEgress/CompleteEgress``.
+
+        Authentication is re-used from the earlier :meth:`validate` call.
+
+        Returns
+        -------
+        The IDs of the egresses that were approved successfully.
+        """
+        return self._submitter.approve_egress(
+            config=self._validator.config,
+            auth=self._validator.auth,
         )
 
     # ----- MinIO Results Command -----
