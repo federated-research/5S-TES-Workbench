@@ -1,0 +1,49 @@
+name: Release
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write # required for PyPI trusted publishing
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  testing:
+    uses: ./.github/workflows/tests.yml
+
+  release:
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@f37845ddc7c7e8a2aaff2af07ce053fcf639f9c6 # v 1.5.3
+    needs: testing
+    with:
+      node-version: "24"
+    secrets: inherit
+
+  publish-pypi:
+    needs: release
+    if: needs.release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/five-safes-tes-workbench
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.x"
+
+      - name: Build package
+        run: |
+          pip install build
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
