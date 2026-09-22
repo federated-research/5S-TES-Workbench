@@ -3,7 +3,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import requests
 
-from ..constants.minio import (
+from ..constants.s3 import (
     STS_DURATION_SECONDS,
     STS_NAMESPACE,
     STS_TOKEN_EXCHANGE_TIMEOUT,

@@ -8,7 +8,7 @@ from botocore.config import Config
 
 from five_safes_tes_workbench.helpers.project_s3_info import ProjectS3Info
 
-from ...constants.minio import S3_REGION
+from ...constants.s3 import S3_REGION
 from ...helpers.auth import resolve_sts_bearer
 from ...helpers.minio import (
     download_result,
