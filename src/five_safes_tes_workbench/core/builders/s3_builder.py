@@ -25,14 +25,13 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class MinioClientBuilder:
+class S3Builder:
     """
     Builder responsible for connecting to project S3 storage and retrieving
     task output objects after a TES task has completed.
 
     Credentials are obtained by exchanging the bearer token at the
-    configured STS endpoint (AssumeRoleWithWebIdentity). The data-plane
-    client is boto3, which speaks the same S3 API as MinIO and RustFS.
+    configured STS endpoint (AssumeRoleWithWebIdentity).
     """
 
     def __init__(

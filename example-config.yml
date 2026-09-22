@@ -1,19 +1,13 @@
 # ----- Five Safes TES Workbench — Example Configuration ------
 
-
 config:
-
   # ---- Required Configuration ----
 
   project: "your-project-name"
   tes_base_url: "http://localhost:5034"
-  minio_sts_endpoint: "http://your-minio-endpoint:9000/sts"
-  minio_endpoint: "your-minio-endpoint:9000"
-  minio_output_bucket: "your-output-bucket-name"
   tres:
     - "Your-TRE1"
     - "Add more TREs as needed"
-
 
 auth:
   # ---- Option 1: Access Token ----

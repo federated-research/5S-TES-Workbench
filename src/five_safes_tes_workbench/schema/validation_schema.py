@@ -14,7 +14,7 @@ class WorkbenchValidationModel(BaseModel):
 
     Attributes:
     -----------
-    - config: Infrastructure configuration (TES, MinIO, project).
+    - config: Infrastructure configuration (TES, project).
     - auth: Authentication configuration (token or keycloak).
     """
 

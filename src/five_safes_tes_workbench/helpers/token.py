@@ -27,7 +27,7 @@ def _parse_sts_response(response: requests.Response) -> S3Credentials:
 
     Returns
     -------
-    A MinioCredentials object.
+    A S3Credentials object.
     """
     try:
         root = ET.fromstring(response.text)
@@ -74,8 +74,7 @@ def _sts_endpoint_candidates(sts_endpoint: str) -> list[str]:
     """
     Return STS endpoints to try.
 
-    MinIO commonly exposes STS at ``/sts``. RustFS routes
-    ``AssumeRoleWithWebIdentity`` at the service root.
+    S3 commonly exposes STS at ``/sts``.
     """
     parsed = urlsplit(sts_endpoint)
     candidates = [sts_endpoint]
@@ -100,7 +99,7 @@ def exchange_s3_token(bearer: str, sts_endpoint: str) -> S3Credentials:
     Call the STS AssumeRoleWithWebIdentity action and return temporary
     AWS-style credentials.
     """
-    logger.info("Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint)
+    logger.info("Exchanging bearer token for S3 credentials via STS (%s)", sts_endpoint)
 
     response = None
     candidates = _sts_endpoint_candidates(sts_endpoint)
