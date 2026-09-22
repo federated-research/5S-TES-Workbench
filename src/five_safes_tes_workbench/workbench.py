@@ -123,7 +123,7 @@ class Workbench:
 
         Authentication is re-used from the earlier :meth:`validate` call.
         Credentials are exchanged at the configured STS endpoint so that a
-        temporary MinIO session is obtained automatically.
+        temporary S3 session is obtained automatically.
 
         Parameters
         ----------
