@@ -8,7 +8,7 @@ from ..constants.s3 import (
     STS_NAMESPACE,
     STS_TOKEN_EXCHANGE_TIMEOUT,
 )
-from ..helpers.minio import MinioCredentials
+from ..helpers.s3 import S3Credentials
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -17,7 +17,7 @@ STS_ACTION = "AssumeRoleWithWebIdentity"
 STS_VERSION = "2011-06-15"
 
 
-def _parse_sts_response(response: requests.Response) -> MinioCredentials:
+def _parse_sts_response(response: requests.Response) -> S3Credentials:
     """
     Parse and validate the STS response and return the credentials.
 
@@ -54,9 +54,7 @@ def _parse_sts_response(response: requests.Response) -> MinioCredentials:
     if access_key is None or secret_key is None or session_token is None:
         raise RuntimeError("STS response did not contain all required credentials")
 
-    return MinioCredentials(
-        access_key=access_key, secret_key=secret_key, session_token=session_token
-    )
+    return S3Credentials(access_key=access_key, secret_key=secret_key, session_token=session_token)
 
 
 def _local_name(tag: str) -> str:
@@ -97,7 +95,7 @@ def _should_try_next_sts_endpoint(response: requests.Response) -> bool:
     )
 
 
-def exchange_s3_token(bearer: str, sts_endpoint: str) -> MinioCredentials:
+def exchange_s3_token(bearer: str, sts_endpoint: str) -> S3Credentials:
     """
     Call the STS AssumeRoleWithWebIdentity action and return temporary
     AWS-style credentials.

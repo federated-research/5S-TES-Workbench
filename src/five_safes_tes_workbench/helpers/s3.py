@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 
 @dataclass
-class MinioCredentials:
+class S3Credentials:
     """
     Temporary S3 credentials returned by the STS token exchange.
 
