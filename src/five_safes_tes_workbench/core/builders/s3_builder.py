@@ -1,29 +1,34 @@
-"""Builder responsible for fetching task results from MinIO after submission."""
+"""Builder responsible for fetching task results from S3 after submission."""
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from minio import Minio
+import boto3
+from botocore.config import Config
 
 from five_safes_tes_workbench.helpers.project_s3_info import ProjectS3Info
 
+from ...constants.s3 import S3_REGION
 from ...helpers.auth import resolve_sts_bearer
-from ...helpers.minio import (
+from ...helpers.s3 import (
     download_result,
     list_results,
 )
 from ...helpers.token import exchange_s3_token
-from ...helpers.url import is_https, strip_scheme
 from ...schema.auth_schema import AuthValidationModel
 from ...schema.config_schema import ConfigValidationModel
 from ...utils.logger import get_logger
 
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
+
 logger = get_logger(__name__)
 
 
-class MinioClientBuilder:
+class S3Builder:
     """
-    Builder responsible for connecting to MinIO and retrieving task
-    output objects after a TES task has completed.
+    Builder responsible for connecting to project S3 storage and retrieving
+    task output objects after a TES task has completed.
 
     Credentials are obtained by exchanging the bearer token at the
     configured STS endpoint (AssumeRoleWithWebIdentity).
@@ -36,34 +41,34 @@ class MinioClientBuilder:
         project_s3_info: ProjectS3Info,
     ) -> None:
         """
-        Exchange the bearer token for temporary MinIO credentials via STS
-        and create an authenticated Minio client.
+        Exchange the bearer token for temporary S3 credentials via STS
+        and create an authenticated boto3 S3 client.
 
         Parameters
         ----------
-        - config: Validated infrastructure configuration (STS endpoint,
-          MinIO endpoint, output bucket).
+        - config: Validated infrastructure configuration.
         - auth: Validated authentication details used to obtain the bearer
           token.
         - project_s3_info: Project S3 info for the project.
         """
         bearer = resolve_sts_bearer(auth)
         credentials = exchange_s3_token(bearer, project_s3_info.api_endpoint)
-        secure = is_https(project_s3_info.api_endpoint)
-        # Minio() only accepts host:port — strip any http(s):// prefix.
-        endpoint = strip_scheme(project_s3_info.api_endpoint)
-        self._client = Minio(
-            endpoint,
-            access_key=credentials.access_key,
-            secret_key=credentials.secret_key,
-            session_token=credentials.session_token,
-            secure=secure,
+        self._client: "S3Client" = boto3.client(  # pyright: ignore[reportAttributeAccessIssue]
+            "s3",
+            endpoint_url=project_s3_info.api_endpoint,
+            aws_access_key_id=credentials.access_key,
+            aws_secret_access_key=credentials.secret_key,
+            aws_session_token=credentials.session_token,
+            region_name=S3_REGION,
+            config=Config(
+                signature_version="s3v4",
+                s3={"addressing_style": "path"},
+            ),
         )
         self._config = config
         logger.info(
-            "MinIO client initialized (endpoint=%s, secure=%s)",
+            "S3 client initialized (endpoint=%s)",
             project_s3_info.api_endpoint,
-            secure,
         )
 
     def download_results(
@@ -76,7 +81,7 @@ class MinioClientBuilder:
         Download all output objects for a task to a local directory.
 
         Each object is written to ``output_dir/<filename>``, stripping the
-        leading ``<task_id>/`` prefix that MinIO uses as a folder separator.
+        leading ``<task_id>/`` prefix used as a folder separator.
 
         Parameters
         ----------

@@ -4,10 +4,10 @@ from typing import Unpack
 from five_safes_tes_workbench.helpers.project_s3_info import get_project_s3_info
 
 from .common.params.validate_params import ConfigValidationParams
+from .core.builders.s3_builder import S3Builder
 from .core.builders.submit_builder import WorkbenchSubmit
 from .core.builders.tes_builder import WorkbenchTESBuilder
 from .core.builders.validate_builder import WorkbenchValidateBuilder
-from .core.minio.minio_client import MinioClientBuilder
 from .helpers.children_task import (
     get_child_task_info,
     is_child_task_completed,
@@ -102,7 +102,7 @@ class Workbench:
         self._last_task_id = task_id
         return task_id
 
-    # ----- MinIO Results Command -----
+    # ----- S3 Results Command -----
 
     def fetch_outputs(
         self,
@@ -111,7 +111,7 @@ class Workbench:
         output_dir: Path | str | None = None,
     ) -> dict[str, list[Path]]:
         """
-        Download all output objects for a completed TES task from MinIO to disk
+        Download all output objects for a completed TES task from S3 to disk
         for every configured TRE.
 
         If a TRE is specified, only the output objects for that TRE are downloaded.
@@ -123,7 +123,7 @@ class Workbench:
 
         Authentication is re-used from the earlier :meth:`validate` call.
         Credentials are exchanged at the configured STS endpoint so that a
-        temporary MinIO session is obtained automatically.
+        temporary S3 session is obtained automatically.
 
         Parameters
         ----------
@@ -159,7 +159,7 @@ class Workbench:
 
         results: dict[str, list[Path]] = {}
 
-        minio_client = MinioClientBuilder(
+        s3_builder = S3Builder(
             config=self._validator.config,
             auth=self._validator.auth,
             project_s3_info=project_s3_info,
@@ -180,7 +180,7 @@ class Workbench:
                 if output_dir is not None
                 else Path.cwd() / "output" / tre / str(child_task_info.id)
             )
-            results[tre] = minio_client.download_results(
+            results[tre] = s3_builder.download_results(
                 child_task_info.id, resolved_output_dir, project_s3_info.output_bucket
             )
             return results
@@ -197,7 +197,7 @@ class Workbench:
                     if output_dir is not None
                     else Path.cwd() / "output" / tre_in_config / str(child_task_info.id)
                 )
-                results[tre_in_config] = minio_client.download_results(
+                results[tre_in_config] = s3_builder.download_results(
                     child_task_info.id, resolved_output_dir, project_s3_info.output_bucket
                 )
 

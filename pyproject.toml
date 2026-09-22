@@ -12,7 +12,7 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "minio>=7.2.20",
+    "boto3>=1.43.99",
     "py-tes>=1.1.2",
     "pydantic>=2.13.1",
     "pyyaml>=6.0.3",
@@ -30,6 +30,7 @@ source = "vcs"
 [dependency-groups]
 dev = [
     "mypy>=1.20.1",
+    "mypy-boto3-s3>=1.43.93",
     "pytest>=8.0.0",
     "pytest-mock>=3.14.0",
     "ruff>=0.15.11",

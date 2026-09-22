@@ -3,12 +3,12 @@ from urllib.parse import urlsplit, urlunsplit
 
 import requests
 
-from ..constants.minio import (
+from ..constants.s3 import (
     STS_DURATION_SECONDS,
     STS_NAMESPACE,
     STS_TOKEN_EXCHANGE_TIMEOUT,
 )
-from ..helpers.minio import MinioCredentials
+from ..helpers.s3 import S3Credentials
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -17,7 +17,7 @@ STS_ACTION = "AssumeRoleWithWebIdentity"
 STS_VERSION = "2011-06-15"
 
 
-def _parse_sts_response(response: requests.Response) -> MinioCredentials:
+def _parse_sts_response(response: requests.Response) -> S3Credentials:
     """
     Parse and validate the STS response and return the credentials.
 
@@ -27,7 +27,7 @@ def _parse_sts_response(response: requests.Response) -> MinioCredentials:
 
     Returns
     -------
-    A MinioCredentials object.
+    A S3Credentials object.
     """
     try:
         root = ET.fromstring(response.text)
@@ -54,9 +54,7 @@ def _parse_sts_response(response: requests.Response) -> MinioCredentials:
     if access_key is None or secret_key is None or session_token is None:
         raise RuntimeError("STS response did not contain all required credentials")
 
-    return MinioCredentials(
-        access_key=access_key, secret_key=secret_key, session_token=session_token
-    )
+    return S3Credentials(access_key=access_key, secret_key=secret_key, session_token=session_token)
 
 
 def _local_name(tag: str) -> str:
@@ -76,8 +74,7 @@ def _sts_endpoint_candidates(sts_endpoint: str) -> list[str]:
     """
     Return STS endpoints to try.
 
-    MinIO commonly exposes STS at ``/sts``. RustFS routes
-    ``AssumeRoleWithWebIdentity`` at the service root.
+    S3 commonly exposes STS at ``/sts``.
     """
     parsed = urlsplit(sts_endpoint)
     candidates = [sts_endpoint]
@@ -97,12 +94,12 @@ def _should_try_next_sts_endpoint(response: requests.Response) -> bool:
     )
 
 
-def exchange_s3_token(bearer: str, sts_endpoint: str) -> MinioCredentials:
+def exchange_s3_token(bearer: str, sts_endpoint: str) -> S3Credentials:
     """
     Call the STS AssumeRoleWithWebIdentity action and return temporary
     AWS-style credentials.
     """
-    logger.info("Exchanging bearer token for MinIO credentials via STS (%s)", sts_endpoint)
+    logger.info("Exchanging bearer token for S3 credentials via STS (%s)", sts_endpoint)
 
     response = None
     candidates = _sts_endpoint_candidates(sts_endpoint)

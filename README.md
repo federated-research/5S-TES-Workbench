@@ -9,7 +9,7 @@ The typical workflow consists of four steps:
 - **Validate:** Provide your infrastructure configuration and credentials.
 - **Build:** Choose a task template and supply your analysis parameters.
 - **Submit:** Send the task to the TES endpoint.
-- **Fetch Results:** Fetch output files from MinIO storage once the task completes.
+- **Fetch Results:** Fetch output files from S3 storage once the task completes.
 
 ## Pre-Requisites
 
@@ -30,8 +30,7 @@ Before using the Workbench, ensure you have the following:
   uv pip install five-safes-tes-workbench
   ```
 
-- Access to a running **TES endpoint**
-- Access to a **MinIO** instance with an output bucket configured
+- Access to 5S-TES Submission layer
 - Valid **authentication credentials**, which are either a pre-obtained access token from Submission Layer UI or Submission API's Keycloak credentials provided by Submission layer's administrator
 
 ## Quickstart
@@ -84,7 +83,7 @@ The required parameters are structured into two types.
 
 #### Config Parameters
 
-The configuration parameters are required to establish a connection to the TES endpoint, MinIO storage and define which TREs the task will be submitted to.
+The configuration parameters are required to establish a connection to the TES endpoint and define which TREs the task will be submitted to.
 
 | Parameter    | Description                 |
 | ------------ | --------------------------- |
@@ -336,7 +335,7 @@ wb.submit()
 
 ### **Collect Results**
 
-Once a task has been submitted and completed, you can download the output files from MinIO storage using the fetch methods.
+Once a task has been submitted and completed, you can download the output files from S3 storage using the fetch methods.
 
 **Note:** The task must have reached a `Completed` status before fetching results.
 
@@ -386,17 +385,17 @@ wb.fetch_outputs(task_id=945, tre="Nottingham TRE 01")
 
 #### **What to Expect**
 
-Before downloading any files, the Workbench **first queries the submission layer** to check the current status of each child task (the per-TRE sub-task created when you called `wb.submit()`). Only tasks that have reached `Completed` status will have their files fetched from MinIO. Tasks that are still running or have terminated with an error are skipped.
+Before downloading any files, the Workbench **first queries the submission layer** to check the current status of each child task (the per-TRE sub-task created when you called `wb.submit()`). Only tasks that have reached `Completed` status will have their files fetched from S3. Tasks that are still running or have terminated with an error are skipped.
 
 You can also check the submission layer to see the progress of the submission [`https://5s-tes.federated-research.com/`](https://5s-tes.federated-research.com/).
 
 **TRE behavior by state**
 
-| Child Task State | Example Statuses                                                       | Behavior                                                         |
-| ---------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **In progress**  | Running, Pod Processing, Waiting for Agent, Data Out Approval Begun... | Skipped: warning logged, no files downloaded for that TRE        |
-| **Terminated**   | Failed, Cancelled, Data Out Rejected                                   | Skipped: warning logged, no files downloaded for that TRE        |
-| **Completed**    | Completed                                                              | Files downloaded from MinIO into `output/<tre>/<child_task_id>/` |
+| Child Task State | Example Statuses                                                       | Behavior                                                      |
+| ---------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **In progress**  | Running, Pod Processing, Waiting for Agent, Data Out Approval Begun... | Skipped: warning logged, no files downloaded for that TRE     |
+| **Terminated**   | Failed, Cancelled, Data Out Rejected                                   | Skipped: warning logged, no files downloaded for that TRE     |
+| **Completed**    | Completed                                                              | Files downloaded from S3 into `output/<tre>/<child_task_id>/` |
 
 When fetching for **all TREs** (no `tre` argument passed), each TRE is evaluated independently. Completed TREs are downloaded straight away while in-progress or terminated TREs are skipped without affecting the others. You can re-run `wb.fetch_outputs()` at any point and previously downloaded TREs will be overwritten and any that were not yet complete will be retried.
 
@@ -406,8 +405,8 @@ When fetching for **all TREs** (no `tre` argument passed), each TRE is evaluated
 INFO | Child task info: 945, status: Completed
 INFO | Fetching token from keycloak...
 INFO | Keycloak token fetched successfully
-INFO | Exchanging bearer token for MinIO credentials via STS
-INFO | MinIO client initialized
+INFO | Exchanging bearer token for S3 credentials via STS
+INFO | S3 client initialized
 INFO | Found 2 result object(s) for task 945
 INFO | Downloading result object: 945/acro_output_20260501_085731.zip
 INFO | Downloaded -> output/Nottingham TRE 01/945/acro_output_20260501_085731.zip
